@@ -1,0 +1,14 @@
+#Fat Jar Configuration File
+#Wed Oct 30 21:14:40 KST 2013
+onejar.license.required=true
+manifest.classpath=
+manifest.removesigners=true
+onejar.checkbox=false
+jarname=MyPCR_Java_YJ_fat.jar
+manifest.mergeall=true
+manifest.mainclass=com.mypcr.Main
+manifest.file=<createnew>
+jarname.isextern=false
+onejar.expand=
+excludes=
+includes=
