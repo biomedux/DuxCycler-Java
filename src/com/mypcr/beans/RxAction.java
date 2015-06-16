@@ -2,23 +2,23 @@ package com.mypcr.beans;
 
 public class RxAction
 {
-	private byte State;
-	private byte Cover_TempH;
-	private byte Cover_TempL;
-	private byte Chamber_TempH;
-	private byte Chamber_TempL;
-	private byte Heatsink_TempH;
-	private byte Heatsink_TempL;
-	private byte Current_Operation;
-	private byte Current_Action;
-	private byte Current_Loop;
-	private byte Total_Action;
-	private byte Error;
-	private byte Serial_H;
-	private byte Serial_L;
+	private int State;
+	private int Cover_TempH;
+	private int Cover_TempL;
+	private int Chamber_TempH;
+	private int Chamber_TempL;
+	private int Heatsink_TempH;
+	private int Heatsink_TempL;
+	private int Current_Operation;
+	private int Current_Action;
+	private int Current_Loop;
+	private int Total_Action;
+	private int Error;
+	private int Serial_H;
+	private int Serial_L;
 	private int Total_TimeLeft;
 	private double Sec_TimeLeft;
-	private byte Firmware_Version;
+	private int Firmware_Version;
 
 	private boolean IsReceiveOnce = false;
 
@@ -75,23 +75,23 @@ public class RxAction
 
 	public void set_Info(byte[] buffer)
 	{
-		State 				= (buffer[RX_STATE]);
-		Current_Action 		= (buffer[RX_CURRENTACTNO]);
-		Current_Loop		= (buffer[RX_CURRENTLOOP]);
-		Total_Action		= (buffer[RX_TOTALACTNO]);
-		Total_TimeLeft		= (int)((buffer[RX_LEFTTIMEH]) * 256 + (buffer[RX_LEFTTIMEL]));
-		Sec_TimeLeft		= (double)(buffer[RX_LEFTSECTIMEH]) * 256 + (double)(buffer[RX_LEFTSECTIMEL]);
-		Cover_TempH			= (buffer[RX_LIDTEMPH]);
-		Cover_TempL			= (buffer[RX_LIDTEMPL]);
-		Chamber_TempH		= (buffer[RX_CHMTEMPH]);
-		Chamber_TempL		= (buffer[RX_CHMTEMPL]);
-		Heatsink_TempH		= (buffer[RX_SINKTEMPH]);
-		Heatsink_TempL		= (buffer[RX_SINKTEMPL]);
-		Current_Operation	= (buffer[RX_CUR_OPR]);
-		Error				= (buffer[RX_ERROR]);
-		Serial_H			= (buffer[RX_SERIALH]);
-		Serial_L			= (buffer[RX_SERIALL]);
-		Firmware_Version	= (buffer[RX_VERSION]);
+		State 				= (int)(buffer[RX_STATE]&0xff);
+		Current_Action 		= (int)(buffer[RX_CURRENTACTNO]&0xff);
+		Current_Loop		= (int)(buffer[RX_CURRENTLOOP]&0xff);
+		Total_Action		= (int)(buffer[RX_TOTALACTNO]&0xff);
+		Total_TimeLeft		= (int)((buffer[RX_LEFTTIMEH] & 0xff) * 256 + (buffer[RX_LEFTTIMEL] & 0xff));
+		Sec_TimeLeft		= (double)(buffer[RX_LEFTSECTIMEH] & 0xff) * 256 + (double)(buffer[RX_LEFTSECTIMEL]& 0xff);
+		Cover_TempH			= (int)(buffer[RX_LIDTEMPH] & 0xff);
+		Cover_TempL			= (int)(buffer[RX_LIDTEMPL] & 0xff);
+		Chamber_TempH		= (int)(buffer[RX_CHMTEMPH] & 0xff);
+		Chamber_TempL		= (int)(buffer[RX_CHMTEMPL]&0xff);
+		Heatsink_TempH		= (int)(buffer[RX_SINKTEMPH]&0xff);
+		Heatsink_TempL		= (int)(buffer[RX_SINKTEMPL]&0xff);
+		Current_Operation	= (int)(buffer[RX_CUR_OPR]&0xff);
+		Error				= (int)(buffer[RX_ERROR]&0xff);
+		Serial_H			= (int)(buffer[RX_SERIALH]&0xff);
+		Serial_L			= (int)(buffer[RX_SERIALL]&0xff);
+		Firmware_Version	= (int)(buffer[RX_VERSION]&0xff);
 		IsReceiveOnce = true;
 	}
 
@@ -185,7 +185,7 @@ public class RxAction
 		return Serial_L;
 	}
 
-	public byte getFirmware_Version()
+	public int getFirmware_Version()
 	{
 		return Firmware_Version;
 	}
