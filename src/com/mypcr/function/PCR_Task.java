@@ -257,15 +257,14 @@ public class PCR_Task
 		
 		// 남은 시간 변경
 		m_MainUI.getProtocolList().ChangeRemainTime(tempString, m_nCur_ListNumber);
-		
-		
+				
 		if( m_RxAction.getCurrent_Loop() != 0 )
 		{
-			if( m_RxAction.getCurrent_Loop() == -1 )
+			if( m_RxAction.getCurrent_Loop() == 255 )
 				IsGotoStart = true;
 		}
 		
-		if( m_RxAction.getCurrent_Loop() != -1 )
+		if( m_RxAction.getCurrent_Loop() != 255 )
 		{
 			if( IsGotoStart )
 			{
