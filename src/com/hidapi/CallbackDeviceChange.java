@@ -33,12 +33,11 @@ public class CallbackDeviceChange extends Thread
 	
 	public void run()
 	{
-		String[] serials = new String[8];
-		
 		while(true)
 		{
 			try
 			{
+				int firmwareVersion = 0;
 				HIDDeviceInfo[] devices = m_Manager.listDevices();
 				try
 				{
@@ -54,8 +53,6 @@ public class CallbackDeviceChange extends Thread
 				{
 					for( HIDDeviceInfo device : devices )
 					{
-						serials[cnt] = device.getSerial_number();
-						
 						// 150507 YJ serial number check added
 						if( serialNumber != null && device.getSerial_number() != null ){
 							if( device.getVendor_id() == DeviceConstant.VENDOR_ID && 
@@ -63,20 +60,21 @@ public class CallbackDeviceChange extends Thread
 									device.getSerial_number().equals(serialNumber))
 							{
 								cnt++;
+								firmwareVersion = device.getRelease_number();
 							}
 						}
 					}
 					
 					if( previous_counter != cnt ){
 						if( previous_counter < cnt )
-							m_Callback.OnMessage(DeviceChange.CONNECTED, cnt + "");
+							m_Callback.OnMessage(DeviceChange.CONNECTED, cnt + "", firmwareVersion);
 						else 
-							m_Callback.OnMessage(DeviceChange.DISCONNECTED, cnt + "");
+							m_Callback.OnMessage(DeviceChange.DISCONNECTED, cnt + "", firmwareVersion);
 						
 						previous_counter = cnt;
 					}
 				}else{
-					m_Callback.OnMessage(DeviceChange.DISCONNECTED, null);
+					m_Callback.OnMessage(DeviceChange.DISCONNECTED, null, firmwareVersion);
 					cnt = 0;
 				}
 			}catch(Exception e)

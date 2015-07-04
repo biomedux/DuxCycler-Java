@@ -86,6 +86,21 @@ public class ButtonUI implements ActionListener
 				break;
 		}
 	}
+	
+	public boolean isEnable(int button)
+	{
+		switch( button )
+		{
+			case BUTTON_START:
+				return m_Button_Start.isEnabled();
+			case BUTTON_STOP:
+				return m_Button_Stop.isEnabled();
+			case BUTTON_PROTOCOL:
+				return m_Button_ReadProtocol.isEnabled();
+		}
+		
+		return false;
+	}
 
 	@Override
 	public void actionPerformed(ActionEvent e) 

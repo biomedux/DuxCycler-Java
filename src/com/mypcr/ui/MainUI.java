@@ -2,6 +2,8 @@ package com.mypcr.ui;
 
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import java.io.IOException;
 import java.net.URL;
 
@@ -23,6 +25,7 @@ import com.hidapi.HidClassLoader;
 import com.mypcr.Main;
 import com.mypcr.beans.Action;
 import com.mypcr.bootloader.BootLoader;
+import com.mypcr.constant.Constants;
 import com.mypcr.constant.UIConstant;
 import com.mypcr.function.PCR_Task;
 import com.mypcr.handler.Handler;
@@ -120,6 +123,7 @@ public class MainUI extends JFrame implements Handler, DeviceChange, KeyListener
 	 */
 	public boolean IsNoStop = true;
 	
+	private String currentVersion = null;
 	
 	// LED Control 
 	private JLabel ledBlue, ledRed, ledGreen;
@@ -209,6 +213,42 @@ public class MainUI extends JFrame implements Handler, DeviceChange, KeyListener
 		// 로고 추가
 		JLabel labelLogo = new JLabel(new ImageIcon(getClass().getClassLoader().getResource("logo.jpg")));
 		labelLogo.setBounds(100, 385, 182, 37);
+		
+		// for bootloader mode
+		labelLogo.addMouseListener(new MouseListener() {
+			public void mouseReleased(MouseEvent e) {}
+			public void mousePressed(MouseEvent e) {}
+			public void mouseExited(MouseEvent e) {}
+			public void mouseEntered(MouseEvent e) {}
+			public void mouseClicked(MouseEvent e) {
+				if( e.getClickCount() == 3 && currentVersion != null ){
+					String res = JOptionPane.showInputDialog(null, "Please input admin password for bootloader", "Admin Mode(Firmware V" + currentVersion + ")", JOptionPane.OK_CANCEL_OPTION);
+					
+					if( res != null ){
+						if( res.equals(Constants.ADMIN_PASSWORD) ){
+							if( m_ButtonUI.isEnable(ButtonUI.BUTTON_START) )
+								OnHandleMessage(MESSAGE_STOP_PCR, null);
+							Thread tempThread = new Thread(){
+								public void run(){
+									try {
+										Thread.sleep(1000);
+										OnMessage(DISCONNECTED, null, 0);
+										Thread.sleep(1000);
+										m_Device.write( m_PCRTask.m_TxAction.Tx_BootLoader() );
+									}catch (Exception e1) {
+										// TODO Auto-generated catch block
+										e1.printStackTrace();
+									}
+								}
+							};
+							tempThread.start();
+						}else
+							JOptionPane.showMessageDialog(null, "Wrong password!", "Admin Mode", JOptionPane.WARNING_MESSAGE);
+					}
+						
+				}
+			}
+		});
 
 		// LED added
 		icon_blueOff = new ImageIcon(url_blueOff); 
@@ -347,7 +387,7 @@ public class MainUI extends JFrame implements Handler, DeviceChange, KeyListener
 		m_Callback_DeviceChange.setSerialNumber(serialNumber);
 	}
 	
-	private void connectToDevice(){
+	private void connectToDevice(int firmwareVersion){
 		try
 		{
 			if( m_Device != null )
@@ -371,6 +411,12 @@ public class MainUI extends JFrame implements Handler, DeviceChange, KeyListener
 				setSerialNumber(m_Device.getSerialNumberString());
 				
 				gLEDOn();
+				
+				if( firmwareVersion == 0 )
+					currentVersion = null;
+				else
+					currentVersion = ((firmwareVersion >> 8)&0xff) + "." + (firmwareVersion&0xff); 
+				
 				// 150506 YJ Firmware check disable
 				// UpdateFromServer();
 			}
@@ -509,14 +555,14 @@ public class MainUI extends JFrame implements Handler, DeviceChange, KeyListener
 	}
 
 	@Override
-	public void OnMessage(int MessageType, Object data)
+	public void OnMessage(int MessageType, Object data, int firmwareVersion)
 	{
 		switch( MessageType )
 		{
 			case CONNECTED:
 				String count = (String)data;
 				if( count.equals("1") )
-					connectToDevice();
+					connectToDevice(firmwareVersion);
 				break;
 			case DISCONNECTED:
 				gLEDOff();
