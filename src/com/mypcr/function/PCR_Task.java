@@ -596,9 +596,9 @@ public class PCR_Task
 			for(int i=0; i<lines; i++)
 				m_MainUI.getProtocolList().ChangeRemainTime("", i);
 			m_MainUI.getProtocolList().clearSelection();
-			JOptionPane.showMessageDialog(null, "PCR Ended!!");
+			JOptionPane.showMessageDialog(null, "PCR Ended!!", m_MainUI.getSerialNumber(), JOptionPane.OK_OPTION);
 		}
 		else
-			JOptionPane.showMessageDialog(null, "PCR Incomplete!!");
+			JOptionPane.showMessageDialog(null, "PCR Incomplete!!", m_MainUI.getSerialNumber(), JOptionPane.OK_OPTION);
 	}
 }

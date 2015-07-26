@@ -387,6 +387,10 @@ public class MainUI extends JFrame implements Handler, DeviceChange, KeyListener
 		m_Callback_DeviceChange.setSerialNumber(serialNumber);
 	}
 	
+	public String getSerialNumber(){
+		return serialNumber;
+	}
+	
 	private void connectToDevice(int firmwareVersion){
 		try
 		{
