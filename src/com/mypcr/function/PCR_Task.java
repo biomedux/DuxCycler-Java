@@ -30,15 +30,15 @@ public class PCR_Task
 	private static MainUI m_MainUI = null;
 	
 	// 에러 메시지 종류
-	private static final int ERROR_SOLVING			=	0x00;
 	private static final int ERROR_LID_OVER			=	0x01;
 	private static final int ERROR_CHM_OVER 		=	0x02;
-	private static final int ERROR_HEAT_CHM_OVER	=	0x03;
+	private static final int ERROR_LID_CHM_OVER		=	0x03;
 	private static final int ERROR_HEATSINK_OVER	=	0x04;
 	private static final int ERROR_LID_HEATSINK_OVER=	0x05;
 	private static final int ERROR_CHM_HEATSINK_OVER=	0x06;
 	private static final int ERROR_ALL				=	0x07;
 	private static final int ERROR_TEMP_SENSOR		=	0x08;
+	private static final int ERROR_ALL_SYSTEM		=	0x0f;
 	
 	// Timer 를 사용하기 위한 객체
 	private Timer m_NopTimer = null;
@@ -64,7 +64,6 @@ public class PCR_Task
 	public boolean IsAdmin = false;
 	public boolean IsGotoStart = false;
 	private boolean IsDeviceCheck = false;
-	private boolean IsError = false;
 	
 	// Preheat
 	private String m_Preheat = "104";
@@ -425,22 +424,10 @@ public class PCR_Task
 	
 	public void Error_Check()
 	{
-		if( !IsError )
+		// 에러가 있다면
+		if( m_RxAction.getError() != 0 )
 		{
-			// 에러가 있다면
-			if( m_RxAction.getError() != 0 )
-			{
-				IsError = true;
-				Print_ErrorMsg( m_RxAction.getError() );
-			}
-		}
-		else
-		{
-			if( m_RxAction.getError() == 0 )
-			{
-				IsError = false;
-				Print_ErrorMsg( 0x00 );
-			}
+			Print_ErrorMsg( m_RxAction.getError() );
 		}
 	}
 	
@@ -450,32 +437,32 @@ public class PCR_Task
 		
 		switch( error )
 		{
-			case ERROR_SOLVING:
-				message = "Solving the error status";
-				break;
 			case ERROR_LID_OVER:
-				message = "LID overheating error! Please power-off and check MyPCR machine! Program will be shutdown!";
+				message = "LID overheating error! Please power-off and check MyPCR machine!";
 				break;
 			case ERROR_CHM_OVER:
-				message = "Chamber overheating error! Please power-off and check MyPCR machine! Program will be shutdown!";
+				message = "Chamber overheating error! Please power-off and check MyPCR machine!";
 				break;
-			case ERROR_HEAT_CHM_OVER:
-				message = "LID Heater and Chamber overheating error! Please power-off and check MyPCR machine! Program will be shutdown!";
+			case ERROR_LID_CHM_OVER:
+				message = "LID Heater and Chamber overheating error! Please power-off and check MyPCR machine!";
 				break;
 			case ERROR_HEATSINK_OVER:
-				message = "Heat Sink overheating error! Please power-off and check MyPCR machine! Program will be shutdown!";
+				message = "Heat Sink overheating error! Please power-off and check MyPCR machine!";
 				break;
 			case ERROR_LID_HEATSINK_OVER:
-				message = "LID Heater and Heat Sink overheating error! Please power-off and check MyPCR machine! Program will be shutdown!";
+				message = "LID Heater and Heat Sink overheating error! Please power-off and check MyPCR machine!";
 				break;
 			case ERROR_CHM_HEATSINK_OVER:
-				message = "Chamber and Heat Sink overheating error! Please power-off and check MyPCR machine! Program will be shutdown!";
+				message = "Chamber and Heat Sink overheating error! Please power-off and check MyPCR machine!";
 				break;
 			case ERROR_ALL:
-				message = "LID Heater and Chamber, Heat Sink overheating error! Please power-off and check MyPCR machine! Program will be shutdown!";
+				message = "LID Heater and Chamber, Heat Sink overheating error! Please power-off and check MyPCR machine!";
 				break;
 			case ERROR_TEMP_SENSOR:
-				message = "Temperature Sensor error! Please power-off and check MyPCR machine! Program will be shutdown!";
+				message = "Temperature Sensor error! Please power-off and check MyPCR machine!";
+				break;
+			case ERROR_ALL_SYSTEM:
+				message = "All system is not working! Please power-off and check MyPCR machine!";
 				break;
 		}
 		
