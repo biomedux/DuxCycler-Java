@@ -1,8 +1,5 @@
 package com.mypcr.function;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -43,7 +40,6 @@ public class PCR_Task
 	// Timer 를 사용하기 위한 객체
 	private Timer m_NopTimer = null;
 	private Timer m_GoTimer  = null;
-	private boolean m_TimerFlag = false;
 	
 	// Rx, Tx 버퍼를 생성해준다.
 	public RxAction		m_RxAction = null;
@@ -91,7 +87,6 @@ public class PCR_Task
 			case NopTimer.TIMER_NUMBER:
 				m_NopTimer = new Timer();
 				m_NopTimer.schedule(new NopTimer( m_MainUI ), Calendar.getInstance().getTime(), NopTimer.TIMER_DURATION);
-				m_TimerFlag = true;
 				break;
 			case GoTimer.TIMER_NUMBER:
 				m_GoTimer = new Timer();
@@ -297,6 +292,8 @@ public class PCR_Task
 				// Recent Protocol 파일 경로를 받아온다.
 				String path = Functions.Get_RecentProtocolPath();
 				
+				Functions.log("최근 Protocol File 읽기 시도");
+				
 				// 최근 불러온 파일이 있을 경우
 				if( path != null )
 				{
@@ -306,13 +303,19 @@ public class PCR_Task
 						actions = Functions.ReadProtocolbyPath(path);
 					}catch(Exception e)
 					{
+						Functions.log("최근 Protocol File 읽기 실패(설정된 Path 값이 지워짐)");
 						JOptionPane.showMessageDialog(null, "No Recent Protocol File! Please Read Protocol!");
 						return;
 					}
+					
+					Functions.log("최근 Protocol File 읽기 완료");
+					
 					m_MainUI.OnHandleMessage(Handler.MESSAGE_READ_PROTOCOL, actions);
 				}
-				else
+				else{
+					Functions.log("최근 Protocol File 읽기 실패(존재하지 않음)");
 					JOptionPane.showMessageDialog(null, "No Recent Protocol File! Please Read Protocol!");
+				}
 				return;
 			}
 
@@ -329,6 +332,8 @@ public class PCR_Task
 				}
 			};
 			tempThread.start();
+			
+			Functions.log("장비로부터 Protocol 을 읽기 시도");
 
 			while( readLine < (int)m_RxAction.getTotal_Action() )
 			{
@@ -347,33 +352,35 @@ public class PCR_Task
 					
 					byte[] readBuffer = new byte[65];
 					
+					Functions.log(String.format("장비로부터 Protocol 을 읽기 시도(%d/%d)", readLine+1, m_RxAction.getTotal_Action()));
+					
 					if( m_MainUI.getDevice().read(readBuffer) != 0 )
 					{
 						RxAction tempAction = new RxAction();
 						tempAction.set_Info(readBuffer);
 						
-						reqline = readBuffer[RxAction.RX_REQLINE];
+						reqline = tempAction.getReqLine();
 						m_RxAction.setTotal_Action( tempAction.getTotal_Action() );
 						
 						if( reqline == readLine )
 						{
 							Action action = new Action("Device Protocol");
-							if( (readBuffer[RxAction.RX_LABEL] & 0xff) != RxAction.AF_GOTO )
-							{
-								action.setLabel("" + readBuffer[RxAction.RX_LABEL]);
-								action.setTemp("" + readBuffer[RxAction.RX_TEMP]);
-								int time = ((int)(readBuffer[RxAction.RX_TIMEH]*256.) + (int)(readBuffer[RxAction.RX_TIMEL]));
-								action.setTime("" + time);
-							}
+							if( (tempAction.getLabel()) != RxAction.AF_GOTO )
+								action.setLabel("" + tempAction.getLabel());
 							else
-							{
 								action.setLabel("GOTO");
-								action.setTemp("" + readBuffer[RxAction.RX_TEMP]);
-								int time = ((int)(readBuffer[RxAction.RX_TIMEH]*256.) + (int)(readBuffer[RxAction.RX_TIMEL]));
-								action.setTime("" + time);
-							}
+							
+							action.setTemp("" + tempAction.getTemp());
+							int time = ((int)(tempAction.getTime_H()*256.) + (int)(tempAction.getTime_L()));
+							action.setTime("" + time);
+							
 							actions.add(action);
+							Functions.log(String.format("장비로부터 Protocol 을 읽기 성공(%d/%d) Label: %s, Temp: %s, Time: %s", 
+									readLine+1, m_RxAction.getTotal_Action(), action.getLabel(), action.getTemp(), action.getTime()));
 							readLine++;
+						}
+						else{
+							Functions.log(String.format("장비로부터 Protocol 을 읽기 시도 실패(%d/%d)", readLine+1, m_RxAction.getTotal_Action()));
 						}
 					}
 					
@@ -502,7 +509,7 @@ public class PCR_Task
 			hour = minute / 60;
 			minute = minute - hour * 60;
 			
-			if( IsRunning );
+			if( IsRunning && totalTime != 0 )
 				m_MainUI.getProtocolText().setRemainingTimeText((hour < 10 ? "0" + hour : hour) + ":" + (minute < 10 ? "0" + minute : minute) + ":" + (second < 10 ? "0" + second : second));
 		}
 		

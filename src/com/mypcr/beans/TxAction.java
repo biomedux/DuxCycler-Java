@@ -5,24 +5,19 @@ public class TxAction
 {	
 	private byte[] Tx_Buffer;
 	
-	public static final int TX_BUFSIZE		=	65;
+	public static final int TX_BUFSIZE			=	65;
 	
-	private static final int TX_NONE		=	0;
-	private static final int TX_CMD			=	1;
-	private static final int TX_ACTNO		=	2;
-	private static final int TX_START_TEMP	=	2;
-	private static final int TX_TEMP		=	3;
-	private static final int TX_END_TEMP	=	3;
-	private static final int TX_TIMEH		=	4;
-	private static final int TX_PARAM_P		=	4;
-	private static final int TX_TIMEL		=	5;
-	private static final int TX_LIDTEMP		=	6;
-	private static final int TX_REQLINE		=	7;
-	private static final int TX_PARAM_I		=	8;
-	private static final int TX_BOOTLOADER	=	10;
-	private static final int TX_PARAM_D		=	12;
+	private static final int TX_CMD				=	1;
+	private static final int TX_ACTNO			=	2;
+	private static final int TX_TEMP			=	3;
+	private static final int TX_TIMEH			=	4;
+	private static final int TX_TIMEL			=	5;
+	private static final int TX_LIDTEMP			=	6;
+	private static final int TX_REQLINE			=	7;
+	private static final int TX_CURRENT_ACT_NO 	= 	8;
+	private static final int TX_BOOTLOADER		=	10;
 	
-	public static final int AF_GOTO			=	250;
+	public static final int AF_GOTO				=	250;
 	
 	public TxAction()
 	{
@@ -40,7 +35,7 @@ public class TxAction
 		return Tx_Buffer;
 	}
 	
-	public byte[] Tx_TaskWrite(String label, String temp, String time, String preheat)
+	public byte[] Tx_TaskWrite(String label, String temp, String time, String preheat, int currentActNo)
 	{
 		Tx_Clear();
 		int nlabel, ntemp, ntime, npreheat;
@@ -57,6 +52,9 @@ public class TxAction
 		Tx_Buffer[TX_TIMEH] 	= (byte)(ntime/256.0);
 		Tx_Buffer[TX_TIMEL] 	= (byte)ntime;
 		Tx_Buffer[TX_LIDTEMP] 	= (byte)npreheat;
+		Tx_Buffer[TX_CURRENT_ACT_NO] = (byte)currentActNo;
+		Tx_Buffer[TX_REQLINE] = (byte)currentActNo;
+		
 		return Tx_Buffer;
 	}
 	

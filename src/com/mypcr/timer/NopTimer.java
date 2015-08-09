@@ -3,6 +3,8 @@ package com.mypcr.timer;
 import java.io.IOException;
 import java.util.TimerTask;
 
+import com.mypcr.beans.RxAction;
+import com.mypcr.function.Functions;
 import com.mypcr.ui.MainUI;
 
 public class NopTimer extends TimerTask
@@ -16,6 +18,15 @@ public class NopTimer extends TimerTask
 	{
 		m_MainUI = mainUI;
 	}
+	
+	private void logProcess(RxAction rx){
+		String message = String.format("State: %d, CurrentAction: %d, TotalAction: %d, TotalLeftTime: %d, LeftTime: %.0f,"
+									+  "LeftGoto: %d, TempChamberH: %d, TempChamberL: %d Error: %d", 
+									rx.getState(), rx.getCurrent_Action(), rx.getTotal_Action(), rx.getTotal_TimeLeft(), 
+									rx.getSec_TimeLeft(), rx.getCurrent_Loop(), rx.getChamber_TempH(), rx.getChamber_TempL(), 
+									rx.getError());
+		Functions.log(message);
+	}
 
 	@Override
 	public void run()
@@ -24,16 +35,6 @@ public class NopTimer extends TimerTask
 		{
 			if( m_MainUI.getDevice() != null )
 			{
-				m_MainUI.getDevice().write( m_MainUI.getPCR_Task().m_TxAction.Tx_NOP() );
-
-				try
-				{
-					Thread.sleep(10);
-				}catch(InterruptedException e)
-				{
-					e.printStackTrace();
-				}
-
 				byte[] readBuffer = new byte[65];
 
 				if( m_MainUI.getDevice().read(readBuffer) != 0 )
@@ -51,7 +52,11 @@ public class NopTimer extends TimerTask
 					m_MainUI.getPCR_Task().Error_Check();
 
 					m_MainUI.getPCR_Task().Calc_Time();
+					
+					logProcess(m_MainUI.getPCR_Task().m_RxAction);
 				}
+				
+				m_MainUI.getDevice().write( m_MainUI.getPCR_Task().m_TxAction.Tx_NOP() );
 			}
 		}catch(IOException e)
 		{

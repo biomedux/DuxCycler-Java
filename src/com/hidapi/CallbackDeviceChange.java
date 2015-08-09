@@ -2,6 +2,7 @@ package com.hidapi;
 
 import com.codeminders.hidapi.HIDDeviceInfo;
 import com.codeminders.hidapi.HIDManager;
+import com.mypcr.function.Functions;
 
 public class CallbackDeviceChange extends Thread 
 {
@@ -29,6 +30,7 @@ public class CallbackDeviceChange extends Thread
 	
 	public void setSerialNumber(String serialNumber){
 		this.serialNumber = serialNumber;
+		Functions.log(serialNumber + " Device's serial number setting");
 	}
 	
 	public void run()

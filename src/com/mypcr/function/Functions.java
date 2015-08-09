@@ -9,18 +9,21 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 
 import javax.swing.JFrame;
-import javax.swing.JOptionPane;
 
-import com.hidapi.HidClassLoader;
 import com.mypcr.beans.Action;
 
 public class Functions 
 {
 	private static boolean isMac = false;
 	private static String pcrPath = null;
+	private static String logpath = null;
+	private static String logFilePath = null;
+	private static final SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss");
 	
 	static{
 		String os = System.getProperty("os.name", "win").toLowerCase();
@@ -31,10 +34,8 @@ public class Functions
 			isMac = true;
 		}
 		
-		File[] files = File.listRoots();
-		
 		if( !isMac)
-			pcrPath = files[0].getAbsolutePath() + "\\mPCR";
+			pcrPath = "C:\\mPCR";
 		else{
 			String classPath = System.getProperty("java.class.path");
 			String[] tempPath = classPath.split("/");
@@ -43,6 +44,28 @@ public class Functions
 			}
 			
 			pcrPath += "mPCR";
+		}
+		
+		logpath = pcrPath + (isMac ? "/log" : "\\log");
+		
+		String dateFormat = df.format(new Date());
+		logFilePath = logpath + (isMac ? ("/log_" + dateFormat + ".txt") : ("\\log_" + dateFormat + ".txt"));
+	}
+	
+	public static void log(String message)
+	{
+		File logFile = new File(logpath);	logFile.mkdirs();
+		logFile = new File(logFilePath);
+		
+		String dateFormat = "[" + df.format(new Date()) + "] "; 
+		
+		try {
+			PrintWriter out = new PrintWriter(new FileWriter(logFile, true));
+			out.println(dateFormat + message);
+			out.close();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
 	}
 	
@@ -108,29 +131,14 @@ public class Functions
 		String tempData = null;
 		
 		// 파일로부터 데이터를 읽어봄
+		in = new BufferedReader(new InputStreamReader(new FileInputStream( path )));
 		
-		// 130326 YJ
-//		try
-//		{
-			in = new BufferedReader(new InputStreamReader(new FileInputStream( path )));
+		while( (tempData = in.readLine()) != null )
+		{
+			inData.add( tempData );
+		}
 			
-			while( (tempData = in.readLine()) != null )
-			{
-				inData.add( tempData );
-			}
-//		}catch(Exception e)
-//		{
-//			e.printStackTrace();
-//		}finally
-//		{
-//			try
-//			{
-				in.close();
-//			}catch(IOException e)
-//			{
-//				e.printStackTrace();
-//			}
-//		}
+		in.close();
 		
 		// PCR Protocol 파일인지 확인
 		// 맨 윗줄과 맨 끝줄에 %PCR%, %END% 가 있는지 확인
@@ -157,7 +165,7 @@ public class Functions
 			actions[i-1] = new Action(tokens[tokens.length-1]);
 			int j=0;
 			for( String temp : datas )
-			{
+			{	
 				actions[i-1].set(j++, temp);
 			}
 		}

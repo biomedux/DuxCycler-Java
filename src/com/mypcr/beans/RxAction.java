@@ -19,6 +19,13 @@ public class RxAction
 	private int Total_TimeLeft;
 	private double Sec_TimeLeft;
 	private int Firmware_Version;
+	
+	// adding for task write
+	private int Label;
+	private int Temp;
+	private int Time_H;
+	private int Time_L;
+	private int ReqLine;
 
 	private boolean IsReceiveOnce = false;
 
@@ -71,6 +78,8 @@ public class RxAction
 		Current_Operation = 0;	Current_Action = 0;	Current_Loop = -1;
 		Total_Action = 0;	Error = 0;	Total_TimeLeft = 0;
 		Sec_TimeLeft = 0;	Serial_H = 0;	Serial_L = 0;
+		Label = 0;	Temp = 0;	Time_H = 0;	Time_L = 0;
+		ReqLine = 0;
 	}
 
 	public void set_Info(byte[] buffer)
@@ -92,6 +101,12 @@ public class RxAction
 		Serial_H			= (int)(buffer[RX_SERIALH]&0xff);
 		Serial_L			= (int)(buffer[RX_SERIALL]&0xff);
 		Firmware_Version	= (int)(buffer[RX_VERSION]&0xff);
+		Label 				= (int)(buffer[RX_LABEL]&0xff);
+		Temp				= (int)(buffer[RX_TEMP]&0xff);
+		Time_H				= (int)(buffer[RX_TIMEH]&0xff);
+		Time_L				= (int)(buffer[RX_TIMEL]&0xff);
+		ReqLine				= (int)(buffer[RX_REQLINE]&0xff);
+		
 		IsReceiveOnce = true;
 	}
 
@@ -189,4 +204,30 @@ public class RxAction
 	{
 		return Firmware_Version;
 	}
+	
+	public int getLabel()
+	{
+		return Label;
+	}
+	
+	public int getTemp()
+	{
+		return Temp;
+	}
+	
+	public int getTime_H()
+	{
+		return Time_H;
+	}
+	
+	public int getTime_L()
+	{
+		return Time_L;
+	}
+	
+	public int getReqLine()
+	{
+		return ReqLine;
+	}
+	
 }

@@ -21,18 +21,16 @@ import com.codeminders.hidapi.HIDManager;
 import com.hidapi.CallbackDeviceChange;
 import com.hidapi.DeviceChange;
 import com.hidapi.DeviceConstant;
-import com.hidapi.HidClassLoader;
 import com.mypcr.Main;
 import com.mypcr.beans.Action;
 import com.mypcr.bootloader.BootLoader;
 import com.mypcr.constant.Constants;
 import com.mypcr.constant.UIConstant;
+import com.mypcr.function.Functions;
 import com.mypcr.function.PCR_Task;
 import com.mypcr.handler.Handler;
-import com.mypcr.server.parser.ServerParser;
 import com.mypcr.timer.GoTimer;
 import com.mypcr.timer.NopTimer;
-import com.mypcr.tools.Resolution;
 
 /**
  * 처음에 나타나는 UI에 대한 클래스이다.
@@ -177,7 +175,7 @@ public class MainUI extends JFrame implements Handler, DeviceChange, KeyListener
 	private void init()
 	{
 		// 프레임의 크기 지정
-		setBounds((Resolution.X * 2/5), Resolution.Y/4 ,UIConstant.MYPCR_WIDTH ,UIConstant.MYPCR_HEIGHT);
+		setSize(UIConstant.MYPCR_WIDTH, UIConstant.MYPCR_HEIGHT);
 		// 타이틀 설정
 		setTitle("MyPCR version 3.2");
 
@@ -186,6 +184,9 @@ public class MainUI extends JFrame implements Handler, DeviceChange, KeyListener
 
 		// 최대화 막기
 		setResizable(false);
+		
+		// 가운데 위치 시키기
+		setLocationRelativeTo(null);
 		
 		// title icon 변경
 		setIconImage(new ImageIcon(getClass().getClassLoader().getResource("icon.png")).getImage());
@@ -258,12 +259,12 @@ public class MainUI extends JFrame implements Handler, DeviceChange, KeyListener
 		icon_redOff = new ImageIcon(url_redOff);
 		icon_redOn = new ImageIcon(url_redOn);
 		
-		ledBlue = new JLabel(icon_blueOff);
-		ledBlue.setBounds(310, 1, 22, 29);
-		ledRed = new JLabel(icon_redOff);
-		ledRed.setBounds(332, 1, 22, 29);
 		ledGreen = new JLabel(icon_greenOff);
-		ledGreen.setBounds(354, 1, 22, 29);
+		ledGreen.setBounds(310, 1, 22, 29);
+		ledBlue = new JLabel(icon_blueOff);
+		ledBlue.setBounds(332, 1, 22, 29);
+		ledRed = new JLabel(icon_redOff);
+		ledRed.setBounds(354, 1, 22, 29);
 
 		m_Panel.add(m_ProtocolText);
 		m_Panel.add(m_PCRStatusText);
@@ -419,7 +420,9 @@ public class MainUI extends JFrame implements Handler, DeviceChange, KeyListener
 				if( firmwareVersion == 0 )
 					currentVersion = null;
 				else
-					currentVersion = ((firmwareVersion >> 8)&0xff) + "." + (firmwareVersion&0xff); 
+					currentVersion = ((firmwareVersion >> 8)&0xff) + "." + (firmwareVersion&0xff);
+				
+				Functions.log(serialNumber + " 장비와 연결에 성공");
 				
 				// 150506 YJ Firmware check disable
 				// UpdateFromServer();
@@ -450,11 +453,58 @@ public class MainUI extends JFrame implements Handler, DeviceChange, KeyListener
 			case MESSAGE_READ_PROTOCOL:
 				// Protocol 리스트가 담겨있다.
 				Action[] actions = (Action[])data;
+				
 				// null 인 경우는 프로토콜 파일을 잘못 불러온 경우
 				if( actions == null )
 					JOptionPane.showMessageDialog(this, "올바르지 않은 Protocol 파일입니다.");
 				else
 				{
+					Functions.log("Protocol Read 버튼을 누름");
+					
+					Action[] tempActions = new Action[actions.length];
+					// deep copy
+					for(int i=0; i<tempActions.length; ++i)
+						tempActions[i] = new Action(actions[i].getLabel(), actions[i].getTemp(), actions[i].getTime());
+					
+					// 전체 남은 시간 계산
+					int totalSec = 0;
+					for(int i=0; i<tempActions.length; ++i){
+						Action action = tempActions[i];
+						
+ 						if( action.getLabel().equals("GOTO") ){
+							int gotoLabel = Integer.parseInt(action.getTemp());
+							int remain = Integer.parseInt(action.getTime()) - 1;
+							tempActions[i].setTime(remain+"");
+							
+							if( remain != -1 ){
+								// 해당 label 의 index 구하기
+								int gotoIndex = -1;
+								for(int j=0; j<tempActions.length; ++j){
+									if( tempActions[j].getLabel().equals(gotoLabel+"") ){
+										gotoIndex = j;
+									}
+								}
+								
+								if( gotoIndex == -1 ){
+									JOptionPane.showMessageDialog(this, "GOTO 문이 올바르지 않은 Protocol 파일입니다.");
+									return;
+								}
+								
+								i = gotoIndex-1;
+							}
+						}else{
+							totalSec += Integer.parseInt(action.getTime());
+ 							System.out.println(totalSec);
+ 						}
+					}
+					
+					int second = totalSec % 60;
+					int minute = totalSec / 60;
+					int hour = minute / 60;
+					minute = minute - hour * 60;
+					m_ProtocolText.setRemainingTimeText(String.format("%02d:%02d:%02d", hour, minute, second));
+					
+					
 					// 플래그 초기화
 					IsProtocolRead = false;
 					// action의 0번째 배열의 레이블이 null인 경우는 잘못된 파일인 경우.
@@ -462,6 +512,7 @@ public class MainUI extends JFrame implements Handler, DeviceChange, KeyListener
 						return;
 					// List를 비워준다.
 					m_ProtocolList.ResetContent();
+					
 					// 얻어온 프로토콜 만큼 insert 해준다.
 					for( Action action : actions )
 						m_ProtocolList.InsertData(action);
@@ -469,14 +520,18 @@ public class MainUI extends JFrame implements Handler, DeviceChange, KeyListener
 					m_ActionList = actions;
 					// 읽어온 프로토콜 파일의 이름을 상단에 표시한다.
 					m_ProtocolText.setProtocolText(actions[0].getProtocolName());
+					
 					// 읽었으니 플래그 true
 					IsProtocolRead = true;
+					
+					Functions.log("Protocol 파일을 불러 리스트에 추가함");
 				}
 				break;
 				// 스타트 버튼을 눌렀을 때.
 			case MESSAGE_START_PCR:
 				if( IsConnected )
 				{
+					Functions.log("시작 버튼을 통해 PCR 이 시작됨");
 					// 불러온 프로토콜 파일이 있을 경우에만 동작
 					if( IsProtocolRead )
 					{
@@ -498,6 +553,7 @@ public class MainUI extends JFrame implements Handler, DeviceChange, KeyListener
 			case MESSAGE_STOP_PCR:
 				if( IsConnected )
 				{
+					Functions.log("종료 버튼을 통해 프로그램 종료됨");
 					// 종료 처리
 					m_PCRTask.Stop_PCR();
 					m_ButtonUI.setEnable(ButtonUI.BUTTON_START, true);
@@ -566,9 +622,13 @@ public class MainUI extends JFrame implements Handler, DeviceChange, KeyListener
 			case CONNECTED:
 				String count = (String)data;
 				if( count.equals("1") )
-					connectToDevice(firmwareVersion);
+				{
+					Functions.log("장비 연결 시도, firmware version(" + firmwareVersion + ")");
+					connectToDevice(firmwareVersion);	
+				}
 				break;
 			case DISCONNECTED:
+				Functions.log("기존 장비 연결 해제됨");
 				gLEDOff();
 				IsConnected = false;
 				m_ButtonUI.setEnable(ButtonUI.BUTTON_START, false);
