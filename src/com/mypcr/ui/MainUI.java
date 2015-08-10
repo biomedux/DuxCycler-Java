@@ -123,6 +123,8 @@ public class MainUI extends JFrame implements Handler, DeviceChange, KeyListener
 	
 	private String currentVersion = null;
 	
+	private String remainingTime = null;
+	
 	// LED Control 
 	private JLabel ledBlue, ledRed, ledGreen;
 	private URL url_blueOff = getClass().getClassLoader().getResource("ledBLow.png");
@@ -502,8 +504,9 @@ public class MainUI extends JFrame implements Handler, DeviceChange, KeyListener
 					int minute = totalSec / 60;
 					int hour = minute / 60;
 					minute = minute - hour * 60;
-					m_ProtocolText.setRemainingTimeText(String.format("%02d:%02d:%02d", hour, minute, second));
+					remainingTime = String.format("%02d:%02d:%02d", hour, minute, second);
 					
+					m_ProtocolText.setRemainingTimeText(remainingTime);
 					
 					// 플래그 초기화
 					IsProtocolRead = false;
@@ -594,6 +597,9 @@ public class MainUI extends JFrame implements Handler, DeviceChange, KeyListener
 							dialog.setVisible(false);
 
 							m_PCRTask.PCR_End();
+							
+							// Remaining time 을 Protocol 전체 Remaining time 에 맞춰 변경 
+							m_ProtocolText.setRemainingTimeText(remainingTime);
 						}
 					};
 					tempThread2.start();

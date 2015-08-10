@@ -177,13 +177,15 @@ class MyPCRTableModel extends AbstractTableModel
 		s = s%60;
 			
 		if( s == 0 ){
-			if( m == 0 ) time = "";
+			if( m == 0 ) time = "∞";	// s, m 이 둘다 0 인 경우, 무한대 표시
 			else time = m + "m";
 		}else{
 			if( m == 0 ) time = s + "s";
 			else time = m + "m " + s + "s";
 		}
 		
+		// GOTO 문인 경우, m, s 값을 붙이지 않도록 설정
+		time = action.getLabel().equals("GOTO") ? action.getTime() : time;
 		m_ActionList.add(new Action(action.getLabel(), action.getTemp(), time));
 		fireTableDataChanged();
 	}
