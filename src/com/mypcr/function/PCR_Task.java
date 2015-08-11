@@ -333,6 +333,9 @@ public class PCR_Task
 			};
 			tempThread.start();
 			
+			// 장비로부터 얻은 Protocol 로 PCR 을 시작하는 경우에도 Log 를 쓰도록
+			Functions.setLogging(true);
+			
 			Functions.log("장비로부터 Protocol 을 읽기 시도");
 
 			while( readLine < (int)m_RxAction.getTotal_Action() )
@@ -583,6 +586,9 @@ public class PCR_Task
 		m_MainUI.getButtonUI().setEnable(ButtonUI.BUTTON_START, true);
 		m_MainUI.getButtonUI().setEnable(ButtonUI.BUTTON_STOP, false);
 		m_MainUI.getButtonUI().setEnable(ButtonUI.BUTTON_PROTOCOL, true);
+		
+		Functions.log("PCR 종료!(" + (IsFinishPCR ? "PCR Ended!!" : "PCR Incomplete!!") + ")");
+		Functions.setLogging(false);
 		
 		if( IsFinishPCR )
 		{

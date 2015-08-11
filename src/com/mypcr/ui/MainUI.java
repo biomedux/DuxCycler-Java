@@ -461,8 +461,6 @@ public class MainUI extends JFrame implements Handler, DeviceChange, KeyListener
 					JOptionPane.showMessageDialog(this, "올바르지 않은 Protocol 파일입니다.");
 				else
 				{
-					Functions.log("Protocol Read 버튼을 누름");
-					
 					Action[] tempActions = new Action[actions.length];
 					// deep copy
 					for(int i=0; i<tempActions.length; ++i)
@@ -526,14 +524,14 @@ public class MainUI extends JFrame implements Handler, DeviceChange, KeyListener
 					
 					// 읽었으니 플래그 true
 					IsProtocolRead = true;
-					
-					Functions.log("Protocol 파일을 불러 리스트에 추가함");
 				}
 				break;
 				// 스타트 버튼을 눌렀을 때.
 			case MESSAGE_START_PCR:
 				if( IsConnected )
 				{
+					Functions.setLogging(true);
+					
 					Functions.log("시작 버튼을 통해 PCR 이 시작됨");
 					// 불러온 프로토콜 파일이 있을 경우에만 동작
 					if( IsProtocolRead )

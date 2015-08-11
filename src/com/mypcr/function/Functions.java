@@ -24,7 +24,8 @@ public class Functions
 	private static String logpath = null;
 	private static String logFilePath = null;
 	private static final SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss");
-	
+	private static boolean isLogging = false;
+
 	static{
 		String os = System.getProperty("os.name", "win").toLowerCase();
 		
@@ -54,19 +55,25 @@ public class Functions
 	
 	public static void log(String message)
 	{
-		File logFile = new File(logpath);	logFile.mkdirs();
-		logFile = new File(logFilePath);
-		
-		String dateFormat = "[" + df.format(new Date()) + "] "; 
-		
-		try {
-			PrintWriter out = new PrintWriter(new FileWriter(logFile, true));
-			out.println(dateFormat + message);
-			out.close();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+		if( isLogging ){
+			File logFile = new File(logpath);	logFile.mkdirs();
+			logFile = new File(logFilePath);
+			
+			String dateFormat = "[" + df.format(new Date()) + "] "; 
+			
+			try {
+				PrintWriter out = new PrintWriter(new FileWriter(logFile, true));
+				out.println(dateFormat + message);
+				out.close();
+			} catch (IOException e) {
+				// 	TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 		}
+	}
+	
+	public static void setLogging(boolean isLogging){
+		Functions.isLogging = isLogging; 
 	}
 	
 	public static String Get_RecentProtocolPath()
