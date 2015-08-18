@@ -261,12 +261,12 @@ public class MainUI extends JFrame implements Handler, DeviceChange, KeyListener
 		icon_redOff = new ImageIcon(url_redOff);
 		icon_redOn = new ImageIcon(url_redOn);
 		
-		ledGreen = new JLabel(icon_greenOff);
-		ledGreen.setBounds(310, 1, 22, 29);
+		ledRed = new JLabel(icon_redOff);
+		ledRed.setBounds(310, 1, 22, 29);
 		ledBlue = new JLabel(icon_blueOff);
 		ledBlue.setBounds(332, 1, 22, 29);
-		ledRed = new JLabel(icon_redOff);
-		ledRed.setBounds(354, 1, 22, 29);
+		ledGreen = new JLabel(icon_greenOff);
+		ledGreen.setBounds(354, 1, 22, 29);
 
 		m_Panel.add(m_ProtocolText);
 		m_Panel.add(m_PCRStatusText);
@@ -387,6 +387,7 @@ public class MainUI extends JFrame implements Handler, DeviceChange, KeyListener
 	
 	public void setSerialNumber(String serialNumber){
 		this.serialNumber = serialNumber;
+		Functions.setLogSerialNumber(serialNumber);
 		m_Callback_DeviceChange.setSerialNumber(serialNumber);
 	}
 	

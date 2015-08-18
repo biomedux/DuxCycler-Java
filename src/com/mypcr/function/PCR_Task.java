@@ -476,6 +476,7 @@ public class PCR_Task
 				break;
 		}
 		
+		Functions.log("에러 발생: " + message);
 		JOptionPane.showMessageDialog(null, message);
 	}
 	

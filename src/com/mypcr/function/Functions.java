@@ -25,6 +25,7 @@ public class Functions
 	private static String logFilePath = null;
 	private static final SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss");
 	private static boolean isLogging = false;
+	private static String serialNumber = null;
 
 	static{
 		String os = System.getProperty("os.name", "win").toLowerCase();
@@ -53,13 +54,17 @@ public class Functions
 		logFilePath = logpath + (isMac ? ("/log_" + dateFormat + ".txt") : ("\\log_" + dateFormat + ".txt"));
 	}
 	
+	public static void setLogSerialNumber(String serialNumber){
+		Functions.serialNumber = serialNumber;
+	}
+	
 	public static void log(String message)
 	{
 		if( isLogging ){
 			File logFile = new File(logpath);	logFile.mkdirs();
 			logFile = new File(logFilePath);
 			
-			String dateFormat = "[" + df.format(new Date()) + "] "; 
+			String dateFormat = "[" + df.format(new Date()) + ", + " + serialNumber + "] "; 
 			
 			try {
 				PrintWriter out = new PrintWriter(new FileWriter(logFile, true));
