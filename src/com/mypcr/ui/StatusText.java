@@ -2,7 +2,6 @@ package com.mypcr.ui;
 
 import java.awt.BasicStroke;
 import java.awt.Color;
-import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
@@ -14,6 +13,8 @@ import com.mypcr.constant.UIConstant;
 
 public class StatusText extends JComponent
 {
+	private static final long serialVersionUID = 1L;
+
 	private static StatusText instance = null; 
 	
 	private GroupBox m_GroupBox = null;

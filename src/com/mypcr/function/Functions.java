@@ -4,24 +4,30 @@ import java.awt.FileDialog;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.io.PrintWriter;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 
 import javax.swing.JFrame;
+import javax.swing.JOptionPane;
 
 import com.mypcr.beans.Action;
+import com.mypcr.constant.ProtocolConstants;
 
 public class Functions 
 {
 	private static boolean isMac = false;
 	private static String pcrPath = null;
 	private static String logpath = null;
+	private static String protocolPath = null;
 	private static String logFilePath = null;
 	private static final SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss");
 	private static boolean isLogging = false;
@@ -49,6 +55,7 @@ public class Functions
 		}
 		
 		logpath = pcrPath + (isMac ? "/log" : "\\log");
+		protocolPath = pcrPath + (isMac ? "/protocols" : "\\protocols");
 		
 		String dateFormat = df.format(new Date());
 		logFilePath = logpath + (isMac ? ("/log_" + dateFormat + ".txt") : ("\\log_" + dateFormat + ".txt"));
@@ -75,6 +82,149 @@ public class Functions
 				e.printStackTrace();
 			}
 		}
+	}
+	
+	public static Action[] loadProtocol(String protocolName) throws Exception {
+		File protocolDir = new File(protocolPath);	protocolDir.mkdirs();
+		protocolDir = new File(protocolPath + (isMac ? "/" : "\\") + protocolName);
+		Action[] action = null;
+		
+		FileInputStream fis = new FileInputStream(protocolDir);
+		ObjectInputStream ois = new ObjectInputStream(fis);
+		
+		action = (Action[])ois.readObject();
+		ois.close();
+		
+		return action;
+	}
+	
+	public static void saveProtocol(Action[] action, String protocolName){
+		File protocolDir = new File(protocolPath);	protocolDir.mkdirs();
+		protocolDir = new File(protocolPath + (isMac ? "/" : "\\") + protocolName);
+		
+		try{
+			FileOutputStream fos = new FileOutputStream(protocolDir);
+			ObjectOutputStream oos = new ObjectOutputStream(fos);
+			
+			oos.writeObject(action);
+			oos.close();
+		}catch(IOException e){
+			JOptionPane.showMessageDialog(null, "Protocol 을 저장하는데 문제가 발생하였습니다.");
+			e.printStackTrace();
+		}
+	}
+	
+	public static void removeProtocol(String protocolName){
+		File protocolDir = new File(protocolPath);	protocolDir.mkdirs();
+		protocolDir = new File(protocolPath + (isMac ? "/" : "\\") + protocolName);
+		protocolDir.delete();
+	}
+	
+	public static ArrayList<Action[]> enumProtocols(){
+		File protocolDir = new File(protocolPath);	protocolDir.mkdirs();
+		File[] files = protocolDir.listFiles();
+		
+		ArrayList<Action[]> returnList = new ArrayList<Action[]>();
+		
+		for(int i=0; i<files.length; ++i){
+			File file = files[i];
+			Action[] temp = null;
+			
+			// ext 확인 필요
+			if( !file.getName().endsWith(ProtocolConstants.ext) )
+				continue;
+			
+			// Checking for validation
+			try{
+				FileInputStream fis = new FileInputStream(file);
+				ObjectInputStream ois = new ObjectInputStream(fis);
+				
+				temp = (Action[])ois.readObject();
+				ois.close();
+			}catch(Exception e){
+				// this file is not protocol file.
+				e.printStackTrace();
+				continue;
+			}
+			
+			returnList.add(temp);
+		}
+		
+		return returnList;
+	}
+	
+	public static ArrayList<String> enumProtocolNames(){
+		File protocolDir = new File(protocolPath);	protocolDir.mkdirs();
+		File[] files = protocolDir.listFiles();
+		
+		ArrayList<String> returnList = new ArrayList<String>();
+		
+		for(int i=0; i<files.length; ++i){
+			File file = files[i];
+			
+			if( !file.getName().endsWith(ProtocolConstants.ext) )
+				continue;
+			
+			// Checking for validation
+			try{
+				FileInputStream fis = new FileInputStream(file);
+				ObjectInputStream ois = new ObjectInputStream(fis);
+				
+				ois.readObject();
+				ois.close();
+			}catch(Exception e){
+				// this file is not protocol file.
+				e.printStackTrace();
+				continue;
+			}
+			
+			returnList.add(file.getName());
+		}
+		
+		return returnList;
+	}
+	
+	public static String calcTotalTime(Action[] actions){
+		if( actions == null )
+			return "00:00:00";
+		
+		Action[] tempActions = new Action[actions.length];
+		// deep copy
+		for(int i=0; i<tempActions.length; ++i)
+			tempActions[i] = new Action(actions[i].getLabel(), actions[i].getTemp(), actions[i].getTime());
+		
+		// 전체 남은 시간 계산
+		int totalSec = 0;
+		for(int i=0; i<tempActions.length; ++i){
+			Action action = tempActions[i];
+			
+			if( action.getLabel().equalsIgnoreCase("GOTO") ){
+				String gotoLabel = action.getTemp();
+				int remain = Integer.parseInt(action.getTime()) - 1;
+				tempActions[i].setTime(remain+"");
+				
+				if( remain != -1 ){
+					// 	해당 label 의 index 구하기
+					int gotoIndex = -1;
+					for(int j=0; j<tempActions.length; ++j){
+						if( tempActions[j].getLabel().equals(gotoLabel+"") ){
+							gotoIndex = j;
+						}
+					}
+				
+					i = gotoIndex-1;
+				}
+			}else{
+				totalSec += Integer.parseInt(action.getTime());
+			}
+		}
+		
+		int second = totalSec % 60;
+		int minute = totalSec / 60;
+		int hour = minute / 60;
+		minute = minute - hour * 60;
+		
+		return String.format("%02d:%02d:%02d", hour, minute, second);
 	}
 	
 	public static void setLogging(boolean isLogging){

@@ -300,7 +300,7 @@ public class PCR_Task
 					Action[] actions = null;
 					try
 					{
-						actions = Functions.ReadProtocolbyPath(path);
+						actions = Functions.loadProtocol(path);
 					}catch(Exception e)
 					{
 						Functions.log("최근 Protocol File 읽기 실패(설정된 Path 값이 지워짐)");

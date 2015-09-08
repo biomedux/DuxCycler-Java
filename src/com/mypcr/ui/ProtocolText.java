@@ -1,17 +1,15 @@
 package com.mypcr.ui;
 
-import java.awt.Color;
-import java.awt.Font;
 import java.awt.Graphics;
 
 import javax.swing.JComponent;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
 
 import com.mypcr.constant.UIConstant;
 
 public class ProtocolText extends JComponent 
 {
+	private static final long serialVersionUID = 1L;
+	
 	private String Protocol_Text = UIConstant.PROTOCOL_DEFAULT_NAME;
 	private String RemainingTime_Text = UIConstant.REMAINING_TIME;
 	

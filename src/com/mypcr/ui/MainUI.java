@@ -13,8 +13,6 @@ import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
-import javax.swing.event.DocumentEvent;
-import javax.swing.event.DocumentListener;
 
 import com.codeminders.hidapi.HIDDevice;
 import com.codeminders.hidapi.HIDManager;
@@ -31,6 +29,7 @@ import com.mypcr.function.PCR_Task;
 import com.mypcr.handler.Handler;
 import com.mypcr.timer.GoTimer;
 import com.mypcr.timer.NopTimer;
+import com.mypcr.ui.custom.ThemeManager;
 
 /**
  * 처음에 나타나는 UI에 대한 클래스이다.
@@ -169,6 +168,9 @@ public class MainUI extends JFrame implements Handler, DeviceChange, KeyListener
 	public MainUI()
 	{
 		init();
+		
+		// Not change calling position
+		ThemeManager.setPlasticTheme();
 	}
 	/**
 	 * UI를 초기화 하거나, 객체들을 초기화 하는 역할을 한다.
@@ -225,7 +227,8 @@ public class MainUI extends JFrame implements Handler, DeviceChange, KeyListener
 			public void mouseEntered(MouseEvent e) {}
 			public void mouseClicked(MouseEvent e) {
 				if( e.getClickCount() == 3 && currentVersion != null ){
-					String res = JOptionPane.showInputDialog(null, "Please input admin password for bootloader", "Admin Mode(Firmware V" + currentVersion + ")", JOptionPane.OK_CANCEL_OPTION);
+					String res = JOptionPane.showInputDialog(null, "Please input admin password for bootloader", 
+							"Admin Mode(Firmware V" + currentVersion + ", Source " + Constants.SOURCE_VERSION + ")", JOptionPane.OK_CANCEL_OPTION);
 					
 					if( res != null ){
 						if( res.equals(Constants.ADMIN_PASSWORD) ){
@@ -495,7 +498,6 @@ public class MainUI extends JFrame implements Handler, DeviceChange, KeyListener
 							}
 						}else{
 							totalSec += Integer.parseInt(action.getTime());
- 							System.out.println(totalSec);
  						}
 					}
 					
@@ -512,6 +514,9 @@ public class MainUI extends JFrame implements Handler, DeviceChange, KeyListener
 					// action의 0번째 배열의 레이블이 null인 경우는 잘못된 파일인 경우.
 					if( actions[0].getLabel() == null )
 						return;
+					
+					// TODO: List 에 넣는 부분을 수정할 예정
+					
 					// List를 비워준다.
 					m_ProtocolList.ResetContent();
 					
@@ -520,6 +525,7 @@ public class MainUI extends JFrame implements Handler, DeviceChange, KeyListener
 						m_ProtocolList.InsertData(action);
 					// 받아온 프로토콜들을 멤버변수에 저장해준다.
 					m_ActionList = actions;
+					
 					// 읽어온 프로토콜 파일의 이름을 상단에 표시한다.
 					m_ProtocolText.setProtocolText(actions[0].getProtocolName());
 					

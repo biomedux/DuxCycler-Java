@@ -3,7 +3,6 @@ package com.mypcr;
 import javax.swing.JOptionPane;
 
 import com.hidapi.HidClassLoader;
-import com.mypcr.function.Functions;
 import com.mypcr.ui.MainUI;
 
 /**
@@ -43,5 +42,7 @@ public class Main
 		
 		ui.setSerialNumber(args[0]);
 		ui.Run();
+		
+		
 	}
 }

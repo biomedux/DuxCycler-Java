@@ -1,11 +1,15 @@
 package com.mypcr.beans;
 
-public class Action 
+import java.io.Serializable;
+
+public class Action implements Serializable
 {
 	private static final int LABEL = 0;
 	private static final int TEMP = 1;
 	private static final int TIME = 2;
 	private static final int REMAININGTIME = 3;
+	
+	public static final int AF_GOTO = 250;
 	
 	private String ProtocolName;
 	private String Label;
@@ -48,6 +52,14 @@ public class Action
 		}
 	}
 	
+	public void set(String Label, String Temp, String Time)
+	{
+		this.Label = Label;
+		this.Temp = Temp;
+		this.Time = Time;
+		RemainingTime = "";
+	}
+	
 	public void set(int index, String data)
 	{
 		switch( index )
@@ -65,6 +77,10 @@ public class Action
 				this.RemainingTime = data;
 				break;
 		}
+	}
+	
+	public void setProtocolName(String protocolName){
+		this.ProtocolName = protocolName;
 	}
 	
 	public String getProtocolName()

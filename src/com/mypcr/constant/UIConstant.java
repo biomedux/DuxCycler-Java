@@ -13,7 +13,7 @@ public class UIConstant
 	public static final String DEFAULT_STATUS_MESSAGE2	=	"0.0 กษ";
 	public static final String BUTTON_START_TEXT		=	"Start";
 	public static final String BUTTON_STOP_TEXT			=	"Stop";
-	public static final String BUTTON_READPROTOCOL_TEXT	=	"Read Protocol";
+	public static final String BUTTON_READPROTOCOL_TEXT	=	"Protocol Manager";
 	public static final String BUTTON_EXIT_TEXT			=	"Exit";
 	
 	// UI X, Y, Width, Hegiht values

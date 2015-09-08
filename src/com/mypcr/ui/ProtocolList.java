@@ -2,10 +2,8 @@ package com.mypcr.ui;
 
 import java.util.ArrayList;
 import java.util.Enumeration;
-import java.util.Vector;
 
 import javax.swing.JLabel;
-import javax.swing.JOptionPane;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.ListSelectionModel;
@@ -105,6 +103,8 @@ public class ProtocolList
 
 class MyPCRTableModel extends AbstractTableModel
 {
+	private static final long serialVersionUID = 1L;
+
 	private static MyPCRTableModel instance = null;
 
 	private ArrayList<Action> m_ActionList = null;

@@ -7,13 +7,10 @@ import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 
-import com.mypcr.beans.Action;
 import com.mypcr.constant.UIConstant;
-import com.mypcr.function.Functions;
 import com.mypcr.handler.Handler;
-import com.mypcr.timer.NopTimer;
 
-public class ButtonUI implements ActionListener
+public class ButtonUI implements ActionListener, Handler
 {
 	private static ButtonUI instance = null;
 	public static final int BUTTON_START	=	0x00;
@@ -26,6 +23,8 @@ public class ButtonUI implements ActionListener
 	private JButton m_Button_Stop = null;
 	private JButton m_Button_ReadProtocol = null;
 	//private JButton m_Button_Exit = null;
+	
+	public static final int MESSAGE_PROTOCOL_SELECTED = 0x01;
 	
 	private ButtonUI()
 	{
@@ -117,14 +116,25 @@ public class ButtonUI implements ActionListener
 		}
 		else if( event == m_Button_ReadProtocol )
 		{
+			ProtocolManager ui = new ProtocolManager(this);
+			ui.showDialog();
+			
+			/* 이전 버전 복구용
 			Action[] actions = null;
 			actions = Functions.ReadProtocolbyDialog( m_Parent );
+
 			// Parent 에 메시지를 날리고, 메시지의 유효성 여부는 Parent에 맡긴다.
 			((Handler)m_Parent).OnHandleMessage(Handler.MESSAGE_READ_PROTOCOL, actions);
+			*/
 		}
-		//else if( event == m_Button_Exit )
-		//{
-			
-		//}
+	}
+
+	@Override
+	public void OnHandleMessage(int MessageType, Object data) {
+		switch( MessageType ){
+			case MESSAGE_PROTOCOL_SELECTED:
+				((Handler)m_Parent).OnHandleMessage(Handler.MESSAGE_READ_PROTOCOL, data);
+				break;
+		}
 	}
 }
