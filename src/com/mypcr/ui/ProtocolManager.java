@@ -171,7 +171,7 @@ public class ProtocolManager extends JDialog implements WindowListener, ActionLi
 		for(int i=0; i<actions.size(); ++i){
 			Action[] tempActions = actions.get(i);
 			
-			comboProtocol.addItem(tempActions[i].getProtocolName());
+			comboProtocol.addItem(tempActions[0].getProtocolName());
 		}
 	}
 	
