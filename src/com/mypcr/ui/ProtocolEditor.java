@@ -294,6 +294,13 @@ public class ProtocolEditor extends JDialog implements WindowListener, ActionLis
 					JOptionPane.showMessageDialog(null, "마지막 Protocol 은 삭제할 수 없습니다.");
 					return;
 				}
+				else if( protocols.size() == 3 && protocols.get(1).isGoto() && selectedProtocol == 0){	
+					// protocol 이 3개이고(end 포함), goto 문과 일반 step 이 하나 있는 경우
+					// 첫번째 프로토콜을 지울 경우, goto 도 같이 지워져야 하는게 기본 동작 원리인데, 그렇게 될 경우, 마지막 Protocol 까지 다 삭제되므로
+					// 삭제가 되지 않도록 한다.
+					JOptionPane.showMessageDialog(null, "마지막 Protocol 은 삭제할 수 없습니다.");
+					return;
+				}
 				
 				viewer.removeProtocol(selectedProtocol);
 				viewer.setSelectedIndex(-1);

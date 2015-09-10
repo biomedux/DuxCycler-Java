@@ -42,7 +42,5 @@ public class Main
 		
 		ui.setSerialNumber(args[0]);
 		ui.Run();
-		
-		
 	}
 }

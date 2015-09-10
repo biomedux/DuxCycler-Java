@@ -114,7 +114,7 @@ public class ProtocolViewer extends JPanel implements Handler{
 				int currentGotoLength = label-targetLabel;
 				
 				if( prevGotoLength != currentGotoLength ){
-					p.setGoto(targetLabel+1);
+					p.setGoto(label-prevGotoLength);
 					p.restoreGoto(true);
 				}
 			}
@@ -238,6 +238,8 @@ public class ProtocolViewer extends JPanel implements Handler{
 		if( index < 0  || (protocolList.size() <= 2 && index < 2) || index >= protocolList.size() )
 			throw new RuntimeException("Software has some problems");
 		
+		boolean isGotoLine = false;
+		// Checking the goto
 		for(int i=index+1; i<protocolList.size(); ++i){
 			Protocol p = protocolList.get(i);
 			if( p.isGoto() ){
@@ -246,15 +248,31 @@ public class ProtocolViewer extends JPanel implements Handler{
 				int label = p.getActionNumber();
 				
 				if( currentAction >= target && currentAction <= label ){
-					int gotoLength = p.getGotoLength();
-					
-					// goto Length 가 1 인 경우, goto 부분도 지울 수 있도록 두번 호출한다.
-					if( gotoLength == 1 )
-						protocolList.remove(index);
-					else
-						p.setGotoLength(p.getGotoLength()-1);
+					isGotoLine = true;
+					break;
 				}
-				break;
+			}
+		}
+		
+		if( isGotoLine ){
+			for(int i=index+1; i<protocolList.size(); ++i){
+				Protocol p = protocolList.get(i);
+				if( p.isGoto() ){
+					int currentAction = protocolList.get(index).getActionNumber();
+					int target = p.getGoto();
+					int label = p.getActionNumber();
+					
+					if( currentAction >= target && currentAction <= label ){
+						int gotoLength = p.getGotoLength();
+						
+						// goto Length 가 1 인 경우, goto 부분도 지울 수 있도록 두번 호출한다.
+						if( gotoLength == 1 )
+							protocolList.remove(index);
+						else
+							p.setGotoLength(p.getGotoLength()-1);
+					}
+					break;
+				}
 			}
 		}
 		
