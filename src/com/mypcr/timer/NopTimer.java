@@ -21,14 +21,15 @@ public class NopTimer extends TimerTask
 	
 	private void logProcess(RxAction rx){
 		double chamber_temp = (double)(rx.getChamber_TempH()) + (double)(rx.getChamber_TempL()) * 0.1;
-		double lid_temp = (double)(rx.getChamber_TempH()) + (double)(rx.getChamber_TempL()) * 0.1;
-		double heatsink_temp = (double)(rx.getChamber_TempH()) + (double)(rx.getChamber_TempL()) * 0.1;
+		double lid_temp = (double)(rx.getCover_TempH()) + (double)(rx.getCover_TempL()) * 0.1;
+		double heatsink_temp = (double)(rx.getHeatsink_TempH()) + (double)(rx.getHeatsink_TempH()) * 0.1;
 		
 		String message = String.format("State: %d, CurrentAction: %d, TotalAction: %d, TotalLeftTime: %d, LeftTime: %.0f,"
 									+  "LeftGoto: %d, ChamTemp: %.1f, LidTemp: %.1f, SinkTemp: %.1f, Error: %d", 
 									rx.getState(), rx.getCurrent_Action(), rx.getTotal_Action(), rx.getTotal_TimeLeft(), 
 									rx.getSec_TimeLeft(), rx.getCurrent_Loop(), chamber_temp, lid_temp, heatsink_temp, rx.getError());
 		Functions.log(message);
+		Functions.logTemperature(chamber_temp, false);
 	}
 
 	@Override

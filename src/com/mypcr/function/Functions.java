@@ -27,11 +27,16 @@ public class Functions
 	private static boolean isMac = false;
 	private static String pcrPath = null;
 	private static String logpath = null;
-	private static String protocolPath = null;
 	private static String logFilePath = null;
+	private static String tempLogPath = null;
+	private static String tempLogFilePath = null;
+	private static String protocolPath = null;
 	private static final SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss");
 	private static boolean isLogging = false;
 	private static String serialNumber = null;
+	
+	private static long tempLogCounter = 0;
+	private static long tempLogStartTime = 0; 
 
 	static{
 		String os = System.getProperty("os.name", "win").toLowerCase();
@@ -55,6 +60,7 @@ public class Functions
 		}
 		
 		logpath = pcrPath + (isMac ? "/log" : "\\log");
+		tempLogPath = pcrPath + (isMac ? "/temperature" : "\\temperature");
 		protocolPath = pcrPath + (isMac ? "/protocols" : "\\protocols");
 		
 		String dateFormat = df.format(new Date());
@@ -71,11 +77,49 @@ public class Functions
 			File logFile = new File(logpath);	logFile.mkdirs();
 			logFile = new File(logFilePath);
 			
-			String dateFormat = "[" + df.format(new Date()) + ", + " + serialNumber + "] "; 
+			String dateFormat = "[" + df.format(new Date()) + "," + serialNumber + "] "; 
 			
 			try {
 				PrintWriter out = new PrintWriter(new FileWriter(logFile, true));
 				out.println(dateFormat + message);
+				out.close();
+			} catch (IOException e) {
+				// 	TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+	}
+	
+	public static void logTemperature(double temperature, boolean isFirst){
+		if( isLogging ){
+			File logFile = new File(tempLogPath);	logFile.mkdirs();
+			
+			String header = null;
+			
+			if( isFirst ){
+				tempLogCounter = 0;
+				tempLogStartTime = System.currentTimeMillis();
+				String dateFormat = df.format(new Date());
+				tempLogFilePath = tempLogPath + (isMac ? ("/temp_" + dateFormat + ".txt") : ("\\temp_" + dateFormat + ".txt"));
+				header = String.format("%8s\t%8s\t%8s", "Number", "Time", "Temp");
+			}
+			else
+				tempLogCounter++;
+			
+			logFile = new File(tempLogFilePath);
+			
+			long endTime = System.currentTimeMillis();
+			
+			String data = String.format("%8d\t%8.0f\t%8.1f", tempLogCounter, (endTime-tempLogStartTime)/1000.0, temperature); 
+			
+			try {
+				PrintWriter out = new PrintWriter(new FileWriter(logFile, true));
+				if( header != null ){
+					out.println(serialNumber);
+					out.println(header);
+				}
+				else
+					out.println(data);
 				out.close();
 			} catch (IOException e) {
 				// 	TODO Auto-generated catch block
@@ -228,7 +272,11 @@ public class Functions
 	}
 	
 	public static void setLogging(boolean isLogging){
-		Functions.isLogging = isLogging; 
+		Functions.isLogging = isLogging;
+		
+		if( isLogging ){
+			logTemperature(0, true);
+		}
 	}
 	
 	public static String Get_RecentProtocolPath()
