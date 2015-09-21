@@ -90,7 +90,7 @@ public class Functions
 		}
 	}
 	
-	public static void logTemperature(double temperature, boolean isFirst){
+	public static void logTemperature(double chamber, double lid, double heatsink, boolean isFirst){
 		if( isLogging ){
 			File logFile = new File(tempLogPath);	logFile.mkdirs();
 			
@@ -101,7 +101,7 @@ public class Functions
 				tempLogStartTime = System.currentTimeMillis();
 				String dateFormat = df.format(new Date());
 				tempLogFilePath = tempLogPath + (isMac ? ("/temp_" + dateFormat + ".txt") : ("\\temp_" + dateFormat + ".txt"));
-				header = String.format("%8s\t%8s\t%8s", "Number", "Time", "Temp");
+				header = String.format("%8s\t%8s\t%8s\t%8s\t%8s", "Number", "Time", "Chamber", "Cover", "Heatsink");
 			}
 			else
 				tempLogCounter++;
@@ -110,7 +110,7 @@ public class Functions
 			
 			long endTime = System.currentTimeMillis();
 			
-			String data = String.format("%8d\t%8.0f\t%8.1f", tempLogCounter, (endTime-tempLogStartTime)/1000.0, temperature); 
+			String data = String.format("%8d\t%8.0f\t%8.1f\t%8.1f\t%8.1f", tempLogCounter, (endTime-tempLogStartTime)/1000.0, chamber, lid, heatsink); 
 			
 			try {
 				PrintWriter out = new PrintWriter(new FileWriter(logFile, true));
@@ -275,7 +275,7 @@ public class Functions
 		Functions.isLogging = isLogging;
 		
 		if( isLogging ){
-			logTemperature(0, true);
+			logTemperature(0, 0, 0, true);
 		}
 	}
 	
