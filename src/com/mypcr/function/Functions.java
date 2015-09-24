@@ -99,8 +99,7 @@ public class Functions
 			if( isFirst ){
 				tempLogCounter = 0;
 				tempLogStartTime = System.currentTimeMillis();
-				String dateFormat = df.format(new Date());
-				tempLogFilePath = tempLogPath + (isMac ? ("/temp_" + dateFormat + ".txt") : ("\\temp_" + dateFormat + ".txt"));
+				tempLogFilePath = tempLogPath + (isMac ? ("/" + serialNumber + "tempLog.txt") : ("\\" + serialNumber + "tempLog.txt"));
 				header = String.format("%8s\t%8s\t%8s\t%8s\t%8s", "Number", "Time", "Chamber", "Cover", "Heatsink");
 			}
 			else
@@ -110,10 +109,10 @@ public class Functions
 			
 			long endTime = System.currentTimeMillis();
 			
-			String data = String.format("%8d\t%8.0f\t%8.1f\t%8.1f\t%8.1f", tempLogCounter, (endTime-tempLogStartTime)/1000.0, chamber, lid, heatsink); 
+			String data = String.format("%8d\t%d\t%8.1f\t%8.1f\t%8.1f", tempLogCounter, endTime-tempLogStartTime, chamber, lid, heatsink); 
 			
 			try {
-				PrintWriter out = new PrintWriter(new FileWriter(logFile, true));
+				PrintWriter out = new PrintWriter(new FileWriter(logFile, header == null));
 				if( header != null ){
 					out.println(serialNumber);
 					out.println(header);
