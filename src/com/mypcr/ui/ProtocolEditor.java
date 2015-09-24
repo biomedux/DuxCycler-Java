@@ -7,6 +7,7 @@ import java.awt.event.WindowListener;
 import java.util.ArrayList;
 
 import javax.swing.BorderFactory;
+import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
@@ -234,7 +235,7 @@ public class ProtocolEditor extends JDialog implements WindowListener, ActionLis
 			int selectedProtocol = viewer.getSelectedProtocol();
 			
 			if( selectedProtocol == -1 ){
-				JOptionPane.showMessageDialog(null, "Step 을 선택해 주세요.");
+				JOptionPane.showMessageDialog(null, "Please select step!");
 				return;
 			}
 			
@@ -291,14 +292,14 @@ public class ProtocolEditor extends JDialog implements WindowListener, ActionLis
 			}
 			else{
 				if( protocols.size() == 2 ){
-					JOptionPane.showMessageDialog(null, "마지막 Protocol 은 삭제할 수 없습니다.");
+					JOptionPane.showMessageDialog(null, "The last protocol can't remove.");
 					return;
 				}
 				else if( protocols.size() == 3 && protocols.get(1).isGoto() && selectedProtocol == 0){	
 					// protocol 이 3개이고(end 포함), goto 문과 일반 step 이 하나 있는 경우
 					// 첫번째 프로토콜을 지울 경우, goto 도 같이 지워져야 하는게 기본 동작 원리인데, 그렇게 될 경우, 마지막 Protocol 까지 다 삭제되므로
 					// 삭제가 되지 않도록 한다.
-					JOptionPane.showMessageDialog(null, "마지막 Protocol 은 삭제할 수 없습니다.");
+					JOptionPane.showMessageDialog(null, "The last protocol can't remove.");
 					return;
 				}
 				
@@ -312,17 +313,17 @@ public class ProtocolEditor extends JDialog implements WindowListener, ActionLis
 		else if( o == buttonOk ){
 			if( protocolName == null ){
 				String res = JOptionPane.showInputDialog(null, "Please input your protocol name", getTitle(), JOptionPane.YES_NO_CANCEL_OPTION);
-			
+				
 				if( res != null ){
 					if( res.isEmpty() ){
-						JOptionPane.showMessageDialog(null, "Protocol Name 을 입력해주세요.");
+						JOptionPane.showMessageDialog(null, "Please input protocol name!");
 						return;
 					}
 					
 					// To prevent the duplication protocol name.
 					ArrayList<String> savedProtocols = Functions.enumProtocolNames();
 					if( savedProtocols.contains(res + ProtocolConstants.ext) ){
-						JOptionPane.showMessageDialog(null, "이미 존재하는 프로토콜 이름입니다. 다시 시도해 주세요.");
+						JOptionPane.showMessageDialog(null, "Already exist protocol name, please retry.");
 						return;
 					}
 
@@ -331,16 +332,16 @@ public class ProtocolEditor extends JDialog implements WindowListener, ActionLis
 					// Setting the protocol Name in actions
 					for(int i=0; i<action.length; ++i)
 						action[i].setProtocolName(protocolName);
+					
+					updateProtocolFromViewer();
+					Functions.saveProtocol(action, protocolName);
+					
+					// event to parent and dispose.
+					if( handler != null )
+						handler.OnHandleMessage(ProtocolManager.EVENT_PROTOCOL_LIST_REFRESH, protocolName);
+					dispose();
 				}
 			}
-			
-			updateProtocolFromViewer();
-			Functions.saveProtocol(action, protocolName);
-			
-			// event to parent and dispose.
-			if( handler != null )
-				handler.OnHandleMessage(ProtocolManager.EVENT_PROTOCOL_LIST_REFRESH, protocolName);
-			dispose();
 		}
 		else if( o == buttonCancel ){
 			dispose();

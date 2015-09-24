@@ -1,6 +1,10 @@
 package com.mypcr.ui.custom;
 
+import java.util.Locale;
+import java.util.ResourceBundle;
+
 import javax.swing.JFrame;
+import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 
@@ -19,6 +23,10 @@ public class ThemeManager
         } catch (Exception e)
         {
         }
+	}
+	
+	public static void setLocaleByEnglish(){
+		JOptionPane.setDefaultLocale(new Locale("en"));
 	}
 
 	public static void updateTheme(JFrame frame)

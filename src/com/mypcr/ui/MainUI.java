@@ -171,6 +171,7 @@ public class MainUI extends JFrame implements Handler, DeviceChange, KeyListener
 		
 		// Not change calling position
 		ThemeManager.setPlasticTheme();
+		ThemeManager.setLocaleByEnglish();
 	}
 	/**
 	 * UI를 초기화 하거나, 객체들을 초기화 하는 역할을 한다.

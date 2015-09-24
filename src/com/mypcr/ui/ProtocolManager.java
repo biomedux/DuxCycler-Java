@@ -72,7 +72,7 @@ public class ProtocolManager extends JDialog implements WindowListener, ActionLi
 		buttonCreate.setBounds(15, 25, 100, 30);
 		buttonCreate.addActionListener(this);
 		
-		JLabel labelNotice = new JLabel("* 모든 프로토콜은 공유되어 사용됩니다.");
+		JLabel labelNotice = new JLabel("* All protocols are shared.");
 		labelNotice.setBounds(450, 20, 250, 30);
 		
 		// For combobox border
@@ -162,7 +162,7 @@ public class ProtocolManager extends JDialog implements WindowListener, ActionLi
 			for(int i=0; i<actions.size(); ++i)
 				Functions.saveProtocol(actions.get(i), actions.get(i)[0].getProtocolName());
 			
-			JOptionPane.showMessageDialog(null, "저장된 Custom protocol 이 존재하지 않아, 프로그램 내에 내장된 Protocol 이 생성되었습니다.");
+			JOptionPane.showMessageDialog(null, "The custom protocol does not exist, built-in protocol has been generated.");
 		}
 		
 		comboProtocol.removeAllItems();
@@ -239,7 +239,7 @@ public class ProtocolManager extends JDialog implements WindowListener, ActionLi
 			String selectedProtocol = (String)comboProtocol.getItemAt( comboProtocol.getSelectedIndex() );
 			Functions.removeProtocol(selectedProtocol);
 			
-			JOptionPane.showMessageDialog(null, selectedProtocol + " 이 삭제되었습니다.");
+			JOptionPane.showMessageDialog(null, selectedProtocol + " is deleted.");
 			
 			loadProtocolList();
 		}
