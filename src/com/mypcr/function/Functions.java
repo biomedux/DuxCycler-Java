@@ -81,15 +81,13 @@ public class Functions
 			
 			String dateFormat = "[" + df.format(new Date()) + "," + serialNumber + "] "; 
 			
-			if( message.startsWith("Start Test")){
-				try {
-					PrintWriter out = new PrintWriter(new FileWriter(logFile, true));
-					out.println(dateFormat + message);
-					out.close();
-				} catch (IOException e) {
-					// 		TODO Auto-generated catch block
-					e.printStackTrace();
-				}
+			try {
+				PrintWriter out = new PrintWriter(new FileWriter(logFile, true));
+				out.println(dateFormat + message);
+				out.close();
+			} catch (IOException e) {
+				// 		TODO Auto-generated catch block
+				e.printStackTrace();
 			}
 		}
 	}
