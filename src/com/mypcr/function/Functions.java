@@ -1,6 +1,7 @@
 package com.mypcr.function;
 
 import java.awt.FileDialog;
+import java.awt.Window;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
@@ -21,6 +22,7 @@ import javax.swing.JOptionPane;
 
 import com.mypcr.beans.Action;
 import com.mypcr.constant.ProtocolConstants;
+import com.mypcr.ui.ProgressDialog;
 
 public class Functions 
 {
@@ -36,7 +38,7 @@ public class Functions
 	private static String serialNumber = null;
 	
 	private static long tempLogCounter = 0;
-	private static long tempLogStartTime = 0; 
+	private static long tempLogStartTime = 0;
 
 	static{
 		String os = System.getProperty("os.name", "win").toLowerCase();
@@ -79,13 +81,15 @@ public class Functions
 			
 			String dateFormat = "[" + df.format(new Date()) + "," + serialNumber + "] "; 
 			
-			try {
-				PrintWriter out = new PrintWriter(new FileWriter(logFile, true));
-				out.println(dateFormat + message);
-				out.close();
-			} catch (IOException e) {
-				// 	TODO Auto-generated catch block
-				e.printStackTrace();
+			if( message.startsWith("Start Test")){
+				try {
+					PrintWriter out = new PrintWriter(new FileWriter(logFile, true));
+					out.println(dateFormat + message);
+					out.close();
+				} catch (IOException e) {
+					// 		TODO Auto-generated catch block
+					e.printStackTrace();
+				}
 			}
 		}
 	}

@@ -124,6 +124,14 @@ public class MainUI extends JFrame implements Handler, DeviceChange, KeyListener
 	
 	private String remainingTime = null;
 	
+	private boolean isTestMode = false;
+	private boolean isStartEndFlag = true;
+	private boolean isStopEndFlag = true;
+	
+	public boolean isTestMode(){
+		return isTestMode;
+	}
+	
 	// LED Control 
 	private JLabel ledBlue, ledRed, ledGreen;
 	private URL url_blueOff = getClass().getClassLoader().getResource("ledBLow.png");
@@ -249,7 +257,51 @@ public class MainUI extends JFrame implements Handler, DeviceChange, KeyListener
 								}
 							};
 							tempThread.start();
-						}else
+						}
+						else if( res.equals(Constants.TESTMODE1_PASSWORD) ){
+							Thread tempThread = new Thread("testmode enter thread"){
+								int testCount = 0;
+								
+								public void run(){
+									isTestMode = true;
+									while( true ){
+										
+										isStartEndFlag = false;
+										while( !isStopEndFlag ){
+											try{
+												Thread.sleep(500);
+											}catch(InterruptedException e){
+												
+											}
+										}
+										
+										long startTime = System.currentTimeMillis();
+										
+										OnHandleMessage(MESSAGE_START_PCR, null);
+										
+										testCount++;
+										
+										while( !isStartEndFlag ){
+											try{
+												Thread.sleep(500);
+											}catch(InterruptedException e){
+												
+											}
+										}
+										
+										long endTime = System.currentTimeMillis();
+										
+										Functions.log(String.format("Start Test(%d) : %d ms", testCount, (endTime-startTime)));
+										
+										isStopEndFlag = false;
+										
+										OnHandleMessage(MESSAGE_STOP_PCR, null);
+									}
+								}
+							};
+							tempThread.start();
+						}
+						else
 							JOptionPane.showMessageDialog(null, "Wrong password!", "Admin Mode", JOptionPane.WARNING_MESSAGE);
 					}
 						
@@ -399,6 +451,24 @@ public class MainUI extends JFrame implements Handler, DeviceChange, KeyListener
 		return serialNumber;
 	}
 	
+	// For reconnect
+	public void connectToDevice(){
+		try
+		{
+			if( m_Device != null )
+			{
+				m_Device.close();
+				m_Device = null;
+			}
+			
+			m_Device = m_Manager.openById(DeviceConstant.VENDOR_ID, DeviceConstant.PRODUCT_ID, serialNumber);
+			if( m_Device != null )
+				m_Device.disableBlocking();
+		}catch(IOException e){
+			e.printStackTrace();
+		}
+	}
+	
 	private void connectToDevice(int firmwareVersion){
 		try
 		{
@@ -541,16 +611,52 @@ public class MainUI extends JFrame implements Handler, DeviceChange, KeyListener
 					Functions.setLogging(true);
 					
 					Functions.log("시작 버튼을 통해 PCR 이 시작됨");
+					
 					// 불러온 프로토콜 파일이 있을 경우에만 동작
 					if( IsProtocolRead )
 					{
 						rLEDOff();
 						
-						m_PCRTask.PCR_Start(m_LidText.getText());
-						m_PCRTask.setTimer(GoTimer.TIMER_NUMBER);
-						m_ButtonUI.setEnable(ButtonUI.BUTTON_START, false);
-						m_ButtonUI.setEnable(ButtonUI.BUTTON_STOP, true);
-						m_ButtonUI.setEnable(ButtonUI.BUTTON_PROTOCOL, false);
+						m_PCRTask.killTimer(NopTimer.TIMER_NUMBER);
+						
+						// Connection 재접속
+						final ProgressDialog dialog = new ProgressDialog(this, "Communication initializing...", 10);
+						// 모달리스 기능을 가진 모달 대화상자를 띄우기 위해 스레드 적용
+						Thread tempThread = new Thread("Start button tempthread1")
+						{
+							public void run()
+							{
+								dialog.setModal(true);
+								dialog.setVisible(true);
+							}
+						};
+						tempThread.start();
+						
+						Thread tempThread2 = new Thread("Start button tempthread2")
+						{
+							public void run()
+							{
+								// reconnect
+								connectToDevice();
+								
+								try
+								{
+									Thread.sleep(2000);
+								}catch(InterruptedException e)
+								{
+									e.printStackTrace();
+								}
+								
+								dialog.dispose();
+								
+								m_PCRTask.PCR_Start(m_LidText.getText());
+								m_PCRTask.setTimer(GoTimer.TIMER_NUMBER);
+								m_ButtonUI.setEnable(ButtonUI.BUTTON_START, false);
+								m_ButtonUI.setEnable(ButtonUI.BUTTON_STOP, true);
+								m_ButtonUI.setEnable(ButtonUI.BUTTON_PROTOCOL, false);
+							}
+						};
+						tempThread2.start();
 					}
 					else
 					{
@@ -562,7 +668,7 @@ public class MainUI extends JFrame implements Handler, DeviceChange, KeyListener
 			case MESSAGE_STOP_PCR:
 				if( IsConnected )
 				{
-					Functions.log("종료 버튼을 통해 프로그램 종료됨");
+					Functions.log("종료 버튼을 통해 PCR 종료됨");
 					// 종료 처리
 					m_PCRTask.Stop_PCR();
 					m_ButtonUI.setEnable(ButtonUI.BUTTON_START, true);
@@ -573,7 +679,7 @@ public class MainUI extends JFrame implements Handler, DeviceChange, KeyListener
 					// Stop 중임을 알리는 프로그래스 바
 					final ProgressDialog dialog = new ProgressDialog(this, "Stoping this device...", 10);
 					// 모달리스 기능을 가진 모달 대화상자를 띄우기 위해 스레드 적용
-					Thread tempThread = new Thread()
+					Thread tempThread = new Thread("Stop button tempthread1")
 					{
 						public void run()
 						{
@@ -584,7 +690,7 @@ public class MainUI extends JFrame implements Handler, DeviceChange, KeyListener
 					tempThread.start();
 
 					// 0.2초 마다 프로그래스바가 1칸씩 동작하도록 2초의 종료 시간을 둔다. ( 안정적인 종료를 위해 )
-					Thread tempThread2 = new Thread()
+					Thread tempThread2 = new Thread("Stop button tempthread2")
 					{
 						public void run()
 						{
@@ -599,13 +705,15 @@ public class MainUI extends JFrame implements Handler, DeviceChange, KeyListener
 									e.printStackTrace();
 								}
 							}
-
+							
 							dialog.setVisible(false);
 
 							m_PCRTask.PCR_End();
 							
 							// Remaining time 을 Protocol 전체 Remaining time 에 맞춰 변경 
 							m_ProtocolText.setRemainingTimeText(remainingTime);
+							
+							isStopEndFlag = true;
 						}
 					};
 					tempThread2.start();
@@ -613,6 +721,8 @@ public class MainUI extends JFrame implements Handler, DeviceChange, KeyListener
 				break;
 				// Start 이후, 프로토콜들을 전부 전송 했을 경우에 NOP 타이머를 동작 시키기 위한 메시지
 			case MESSAGE_TASK_WRITE_END:
+				m_PCRTask.killTimer(GoTimer.TIMER_NUMBER);
+				
 				try
 				{
 					Thread.sleep(300);
@@ -622,6 +732,42 @@ public class MainUI extends JFrame implements Handler, DeviceChange, KeyListener
 				}
 				// NopTimer 동작시킨다.
 				m_PCRTask.setTimer(NopTimer.TIMER_NUMBER);
+				
+				isStartEndFlag = true;
+				break;
+			case MESSAGE_TASK_WRITE_TIMEOUT:
+				m_PCRTask.killTimer(GoTimer.TIMER_NUMBER);
+				
+				final ProgressDialog dialog = new ProgressDialog(this, "Reset communication...", 10);
+				// 모달리스 기능을 가진 모달 대화상자를 띄우기 위해 스레드 적용
+				Thread tempThread = new Thread("timeout tempthread1")
+				{
+					public void run()
+					{
+						dialog.setModal(true);
+						dialog.setVisible(true);
+					}
+				};
+				tempThread.start();
+				
+				Thread tempThread2 = new Thread("timeout tempThread2")
+				{
+					public void run()
+					{
+						try{
+							Thread.sleep(1000);
+						}catch(InterruptedException e){
+							e.printStackTrace();
+						}
+						
+						dialog.setVisible(false);
+						
+						// Restart protocol!
+						System.out.println("Restart!");
+						OnHandleMessage(MESSAGE_START_PCR, null);
+					}
+				};
+				tempThread2.start();
 				break;
 		}
 	}

@@ -41,26 +41,30 @@ public class NopTimer extends TimerTask
 			{
 				byte[] readBuffer = new byte[65];
 
-				if( m_MainUI.getDevice().read(readBuffer) != 0 )
-				{
-					m_MainUI.getPCR_Task().m_RxAction.set_Info(readBuffer);
-
-					m_MainUI.getPCR_Task().Calc_Temp();
-
-					m_MainUI.getPCR_Task().Check_Status();
-
-					m_MainUI.getPCR_Task().Line_Task();
-
-					m_MainUI.getPCR_Task().Get_DeviceProtocol();
-
-					m_MainUI.getPCR_Task().Error_Check();
-
-					m_MainUI.getPCR_Task().Calc_Time();
+				if( m_MainUI.getDevice() != null ){
+					if( m_MainUI.getDevice().read(readBuffer) != 0 )
+					{
+						m_MainUI.getPCR_Task().m_RxAction.set_Info(readBuffer);
+	
+						m_MainUI.getPCR_Task().Calc_Temp();
+	
+						m_MainUI.getPCR_Task().Check_Status();
+	
+						m_MainUI.getPCR_Task().Line_Task();
+	
+						m_MainUI.getPCR_Task().Get_DeviceProtocol();
+	
+						m_MainUI.getPCR_Task().Error_Check();
+	
+						m_MainUI.getPCR_Task().Calc_Time();
+						
+						logProcess(m_MainUI.getPCR_Task().m_RxAction);
+					}
 					
-					logProcess(m_MainUI.getPCR_Task().m_RxAction);
+					m_MainUI.getDevice().write( m_MainUI.getPCR_Task().m_TxAction.Tx_NOP() );
 				}
 				
-				m_MainUI.getDevice().write( m_MainUI.getPCR_Task().m_TxAction.Tx_NOP() );
+				readBuffer = null;
 			}
 		}catch(IOException e)
 		{

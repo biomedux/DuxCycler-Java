@@ -18,6 +18,8 @@ public class GoTimer extends TimerTask
 	public static final int TIMER_DURATION	=	100;
 	public static final int TIMER_NUMBER	=	0x01;
 	
+	private static final int TIMEOUT_MS = 15000;
+	
 	private HIDDevice 		m_Device = null;
 	private MainUI 	  		m_Handler	= null;
 	private TxAction		m_TxAction	= null;
@@ -28,6 +30,9 @@ public class GoTimer extends TimerTask
 	private ProgressDialog 	m_dialog = null;
 	private boolean			isTaskEnd = false;
 	
+	private int 			timerCounter = 0;
+	private boolean			gotoEnded = false;
+	
 	public GoTimer(HIDDevice device, Action[] actions, String preheat, MainUI handler)
 	{
 		m_Device = device;
@@ -37,7 +42,7 @@ public class GoTimer extends TimerTask
 		m_Actions = actions; 
 		m_protocol_length = m_Actions.length;
 		m_dialog = new ProgressDialog(m_Handler, "PCR Protocol Transmitting...", m_protocol_length+2);
-		Thread TempThread = new Thread()
+		Thread TempThread = new Thread("Go timer tempThread1")
 		{
 			public void run()
 			{
@@ -51,6 +56,13 @@ public class GoTimer extends TimerTask
 	@Override
 	public void run() 
 	{
+		timerCounter++;
+		
+		if( timerCounter >= TIMEOUT_MS/TIMER_DURATION ){
+			m_Handler.OnHandleMessage(Handler.MESSAGE_TASK_WRITE_TIMEOUT, null);
+			m_dialog.setVisible(false);
+		}
+		
 		if( m_index < m_protocol_length )
 		{
 			m_dialog.setProgressValue(m_index);
@@ -89,13 +101,17 @@ public class GoTimer extends TimerTask
 					}else{
 						Functions.log(String.format("데이터 전송(ProtocolWrite[%d/%d]) 확인 실패, 재전송",  m_index+1, m_protocol_length));
 					}
+					
+					rx = null;
 				}
+				
+				readBuffer  = null;
 			}catch(Exception e)
 			{
 				e.printStackTrace();
 			}
 		}
-		else
+		else if( !gotoEnded )
 		{
 			try
 			{
@@ -122,8 +138,11 @@ public class GoTimer extends TimerTask
 						
 						if( rx.getTotal_Action() != m_Actions.length ){
 							Functions.log("데이터 전송(ProtocolWriteEnd) 확인 실패");
+							rx = null;
+							readBuffer = null;
 							return;
 						}
+						rx = null;
 					}
 					
 					Functions.log("데이터 전송(ProtocolWriteEnd) 확인 완료");
@@ -152,17 +171,21 @@ public class GoTimer extends TimerTask
 					
 					if( rx.getState() != State.RUN ){
 						Functions.log("데이터 전송(PCR Start) 확인 실패");
+						readBuffer = null;
+						rx = null;
 						return;
 					}
+					rx = null;
 				}
+				readBuffer = null;
 				
 				Functions.log("데이터 전송(PCR Start) 확인 완료");
 				
 				m_dialog.setProgressValue(m_index+2);
 				
 				m_Handler.OnHandleMessage(Handler.MESSAGE_TASK_WRITE_END, null);
-				this.cancel();
-				Thread TempThread = new Thread()
+				
+				Thread TempThread = new Thread("Go timer tempThread2")
 				{
 					public void run()
 					{
@@ -173,7 +196,8 @@ public class GoTimer extends TimerTask
 						{
 							e.printStackTrace();
 						}
-						m_dialog.setVisible(false);
+						m_dialog.dispose();
+						gotoEnded = true;
 					}
 				};
 				TempThread.start();

@@ -7,6 +7,7 @@ import java.util.Timer;
 
 import javax.swing.JOptionPane;
 
+import com.hidapi.DeviceConstant;
 import com.mypcr.beans.Action;
 import com.mypcr.beans.RxAction;
 import com.mypcr.beans.State;
@@ -85,11 +86,11 @@ public class PCR_Task
 		switch( timer )
 		{
 			case NopTimer.TIMER_NUMBER:
-				m_NopTimer = new Timer();
+				m_NopTimer = new Timer("Nop Timer");
 				m_NopTimer.schedule(new NopTimer( m_MainUI ), Calendar.getInstance().getTime(), NopTimer.TIMER_DURATION);
 				break;
 			case GoTimer.TIMER_NUMBER:
-				m_GoTimer = new Timer();
+				m_GoTimer = new Timer("Go Timer");
 				m_GoTimer.schedule( new GoTimer( m_MainUI.getDevice(), m_MainUI.getActionList(), m_Preheat, m_MainUI ), Calendar.getInstance().getTime(), GoTimer.TIMER_DURATION);
 				break;
 		}
@@ -100,10 +101,16 @@ public class PCR_Task
 		switch( timer )
 		{
 			case NopTimer.TIMER_NUMBER:
-				m_NopTimer.cancel();
+				if( m_NopTimer != null ){
+					m_NopTimer.cancel();
+					m_NopTimer = null;
+				}
 				break;
 			case GoTimer.TIMER_NUMBER:
-				m_GoTimer.cancel();
+				if( m_GoTimer != null ){
+					m_GoTimer.cancel();
+					m_GoTimer = null;
+				}
 				break;
 		}
 	}
@@ -425,7 +432,7 @@ public class PCR_Task
 					{
 						e.printStackTrace();
 					}
-					dialog.setVisible(false);
+					dialog.dispose();
 				}
 			};
 			tempThread2.start();
@@ -523,7 +530,6 @@ public class PCR_Task
 	
 	public void PCR_Start(String preheat)
 	{
-		killTimer(NopTimer.TIMER_NUMBER);
 		IsRunning = true;
 		IsFinishPCR = false;
 		IsGotoStart = false;
@@ -597,9 +603,12 @@ public class PCR_Task
 			for(int i=0; i<lines; i++)
 				m_MainUI.getProtocolList().ChangeRemainTime("", i);
 			m_MainUI.getProtocolList().clearSelection();
-			JOptionPane.showMessageDialog(null, "PCR Ended!!", m_MainUI.getSerialNumber(), JOptionPane.OK_OPTION);
+			if( !m_MainUI.isTestMode() )
+				JOptionPane.showMessageDialog(null, "PCR Ended!!", m_MainUI.getSerialNumber(), JOptionPane.OK_OPTION);
 		}
-		else
-			JOptionPane.showMessageDialog(null, "PCR Incomplete!!", m_MainUI.getSerialNumber(), JOptionPane.OK_OPTION);
+		else{
+			if( !m_MainUI.isTestMode() )
+				JOptionPane.showMessageDialog(null, "PCR Incomplete!!", m_MainUI.getSerialNumber(), JOptionPane.OK_OPTION);
+		}
 	}
 }
