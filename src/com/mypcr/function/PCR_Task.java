@@ -61,6 +61,7 @@ public class PCR_Task
 	public boolean IsAdmin = false;
 	public boolean IsGotoStart = false;
 	private boolean IsDeviceCheck = false;
+	private boolean isComplete = false;
 	
 	// Preheat
 	private String m_Preheat = "104";
@@ -142,6 +143,7 @@ public class PCR_Task
 						{
 							IsFinishPCR = true;
 							IsReadyToRun = true;
+							isComplete = true;
 							PCR_End();
 						}
 						break;
@@ -602,13 +604,17 @@ public class PCR_Task
 			int lines = m_MainUI.getActionList().length;
 			for(int i=0; i<lines; i++)
 				m_MainUI.getProtocolList().ChangeRemainTime("", i);
-			m_MainUI.getProtocolList().clearSelection();
-			if( !m_MainUI.isTestMode() )
-				JOptionPane.showMessageDialog(null, "PCR Ended!!", m_MainUI.getSerialNumber(), JOptionPane.OK_OPTION);
+			m_MainUI.getProtocolList( ).clearSelection( );
+			if( !m_MainUI.isTestMode( ) && isComplete )
+			{
+				isComplete = false;
+				JOptionPane.showMessageDialog( null, "PCR Ended!!", m_MainUI.getSerialNumber( ), JOptionPane.OK_OPTION );
+			}
 		}
-		else{
-			if( !m_MainUI.isTestMode() )
-				JOptionPane.showMessageDialog(null, "PCR Incomplete!!", m_MainUI.getSerialNumber(), JOptionPane.OK_OPTION);
+		else
+		{
+			if( !m_MainUI.isTestMode( ) ) JOptionPane.showMessageDialog( null, "PCR Incomplete!!",
+					m_MainUI.getSerialNumber( ), JOptionPane.OK_OPTION );
 		}
 	}
 }

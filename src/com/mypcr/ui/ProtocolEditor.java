@@ -310,7 +310,7 @@ public class ProtocolEditor extends JDialog implements WindowListener, ActionLis
 				enableGotoButton();
 			}
 		}
-		else if( o == buttonOk ){
+		else if( o == buttonOk ){	// v2.51 Protocol save error fix
 			if( protocolName == null ){
 				String res = JOptionPane.showInputDialog(null, "Please input your protocol name", getTitle(), JOptionPane.YES_NO_CANCEL_OPTION);
 				
@@ -328,20 +328,19 @@ public class ProtocolEditor extends JDialog implements WindowListener, ActionLis
 					}
 
 					protocolName = res + ProtocolConstants.ext;
-					
-					// Setting the protocol Name in actions
-					for(int i=0; i<action.length; ++i)
-						action[i].setProtocolName(protocolName);
-					
-					updateProtocolFromViewer();
-					Functions.saveProtocol(action, protocolName);
-					
-					// event to parent and dispose.
-					if( handler != null )
-						handler.OnHandleMessage(ProtocolManager.EVENT_PROTOCOL_LIST_REFRESH, protocolName);
-					dispose();
 				}
 			}
+			// Setting the protocol Name in actions
+			for(int i=0; i<action.length; ++i)
+				action[i].setProtocolName(protocolName);
+			
+			updateProtocolFromViewer();
+			Functions.saveProtocol(action, protocolName);
+			
+			// event to parent and dispose.
+			if( handler != null )
+				handler.OnHandleMessage(ProtocolManager.EVENT_PROTOCOL_LIST_REFRESH, protocolName);
+			dispose();
 		}
 		else if( o == buttonCancel ){
 			dispose();
