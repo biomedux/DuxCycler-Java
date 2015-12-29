@@ -30,7 +30,6 @@ public class Main
 	{
 		MainUI ui = new MainUI();
 		
-		
 		if( args.length != 1 ){
 			JOptionPane.showMessageDialog(null, "mPCR 은 반드시 multiple mPCR 을 통해 실행하셔야 합니다.");
 			return;
@@ -40,8 +39,6 @@ public class Main
 			JOptionPane.showMessageDialog(null, "Serial Number 가 잘못되었습니다.");
 			return;
 		}
-		
-
 		ui.setSerialNumber(args[0]);	// MyPCR333333
 		Functions.logFileCreate( );
 		ui.Run();
