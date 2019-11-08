@@ -107,8 +107,9 @@ public class HIDManager
         HIDDeviceInfo[] devs = listDevices();
         for(HIDDeviceInfo d : devs)
         {
-            if(d.getVendor_id() == vendor_id && d.getProduct_id() == product_id
-                    && (serial_number == null || d.getSerial_number().equals(serial_number)))
+        	// kdw : ignore PRODUCT_ID : bacause product_id is already checked in Java_multi
+            //if(d.getVendor_id() == vendor_id && d.getProduct_id() == product_id  && (serial_number == null || d.getSerial_number().equals(serial_number)))
+			if(d.getVendor_id() == vendor_id && (serial_number == null || d.getSerial_number().equals(serial_number)))
                 return d.open();
         }
         throw new HIDDeviceNotFoundException(); 

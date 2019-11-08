@@ -190,7 +190,7 @@ public class MainUI extends JFrame implements Handler, DeviceChange, KeyListener
 		// 프레임의 크기 지정
 		setSize(UIConstant.MYPCR_WIDTH, UIConstant.MYPCR_HEIGHT);
 		// 타이틀 설정
-		setTitle("MyPCR version 3.2");
+		setTitle("DuxCycler V4.0");
 
 		// 종료시 프로그램 종료
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -226,7 +226,7 @@ public class MainUI extends JFrame implements Handler, DeviceChange, KeyListener
 		
 		// 로고 추가
 		JLabel labelLogo = new JLabel(new ImageIcon(getClass().getClassLoader().getResource("logo.jpg")));
-		labelLogo.setBounds(100, 385, 182, 37);
+		labelLogo.setBounds(100, 385, 182, 50);
 		
 		// for bootloader mode
 		labelLogo.addMouseListener(new MouseListener() {

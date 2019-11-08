@@ -58,7 +58,7 @@ public class CallbackDeviceChange extends Thread
 						// 150507 YJ serial number check added
 						if( serialNumber != null && device.getSerial_number() != null ){
 							if( device.getVendor_id() == DeviceConstant.VENDOR_ID && 
-									device.getProduct_id() == DeviceConstant.PRODUCT_ID && 
+									//device.getProduct_id() == DeviceConstant.PRODUCT_ID &&  // kdw : ignore product_id
 									device.getSerial_number().equals(serialNumber))
 							{
 								cnt++;

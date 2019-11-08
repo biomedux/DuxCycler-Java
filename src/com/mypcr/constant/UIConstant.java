@@ -18,7 +18,7 @@ public class UIConstant
 	
 	// UI X, Y, Width, Hegiht values
 	public static final int MYPCR_WIDTH					=	390;
-	public static final int MYPCR_HEIGHT				=	460;
+	public static final int MYPCR_HEIGHT				=	470;
 	public static final int PROTOCOL_X					=	15;
 	public static final int PROTOCOL_Y					=	15;
 	public static final int REMAINING_TIME_X			=	245;
